@@ -1,6 +1,6 @@
 ##Simple matrix-style pager
 
-Shows text with matrix-style rain-of-symbols animation during page changes.
+Shows text with matrix-style rain-of-symbols animation during page changes.  
 Usage: `mattext [options] filename` or `cat filename | mattext [options]`.
 
 ###Options:
