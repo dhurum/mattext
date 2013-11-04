@@ -38,16 +38,47 @@ OF SUCH DAMAGE.
 #include <argp.h>
 
 #define STR_LEN 1024
+#define DEFAULT_DELAY 80
+#define __MAKE_STR(a) #a
+#define _MAKE_STR(a) __MAKE_STR(a)
+#define DEFAULT_DELAY_STR _MAKE_STR(DEFAULT_DELAY)
+
+const char *argp_program_version = "0.2";
+
+struct CmdLineArgs
+{
+  int delay,
+      rand_columns_len;
+  bool onepage,
+       noninteract,
+       colorize,
+       centrate_horiz,
+       centrate_vert;
+  char filename[FILENAME_MAX + 1];
+  CmdLineArgs();
+};
+
+CmdLineArgs::CmdLineArgs()
+{
+  delay = DEFAULT_DELAY;
+  rand_columns_len = 0;
+  onepage = false;
+  noninteract = false;
+  colorize = false;
+  centrate_horiz = false;
+  centrate_vert = false;
+  filename[0] = '\0';
+}
 
 class Screen
 {
   public:
-    int rows,
-        cols;
-    Screen(int delay, int rand_columns_len);
+    size_t rows,
+           cols;
+    Screen(CmdLineArgs *args);
     ~Screen();
     void playAnimation(char *usr_cmd);
-    void setTextInfo(wchar_t *text, size_t *strings_lens);
+    void setTextInfo(wchar_t *text, size_t *strings_lens, size_t *read_strings);
     void waitForInput(char *usr_cmd);
 
   private:
@@ -59,23 +90,38 @@ class Screen
         delay;
     wchar_t *first_chars,
             *text;
-    size_t *strings_lens;
+    size_t *strings_lens,
+           *read_strings;
     fd_set fds;
     struct timeval select_tm;
+    bool colorize,
+         centrate_horiz,
+         centrate_vert;
 
     wchar_t getTextSymbol(int row, int col);
     bool checkInput();
+    void updateSymbol(int col, int row, wchar_t symbol, bool bold);
 };
 
-Screen::Screen(int _delay, int rand_columns_len)
+Screen::Screen(CmdLineArgs *args)
 {
-  delay = _delay;
+  delay = args->delay;
 
   initscr();
   noecho();
   cbreak();
   curs_set(0);
   getmaxyx(stdscr, rows, cols);
+  
+  colorize = has_colors() ? args->colorize : false;
+  centrate_horiz = args->centrate_horiz;
+  centrate_vert = args->centrate_vert;
+  
+  if(colorize)
+  {
+     start_color();
+     init_pair(1, COLOR_GREEN, COLOR_BLACK);
+  }
 
   col_lengths = new int[cols];
   col_offsets = new int[cols];
@@ -87,13 +133,13 @@ Screen::Screen(int _delay, int rand_columns_len)
     exit(1);
   }
 
-  if(rand_columns_len <= 0)
+  if(args->rand_columns_len <= 0)
   {
     max_col_length = rows;
   }
   else
   {
-    max_col_length = rand_columns_len;
+    max_col_length = args->rand_columns_len;
   }
   tail_length = 10;
 
@@ -125,17 +171,26 @@ static wchar_t getRandomSymbol()
   }
 }
 
-static void updateSymbol(int col, int row, wchar_t symbol, bool bold = false)
+void Screen::updateSymbol(int col, int row, wchar_t symbol, bool bold = false)
 {
   cchar_t out_char;
+  int pair = colorize ? 1 : 0;
 
-  setcchar(&out_char, &symbol, bold? A_BOLD : A_NORMAL, 0, NULL);
+  setcchar(&out_char, &symbol, bold? A_BOLD : A_NORMAL, pair, NULL);
   mvadd_wch(col, row, &out_char);
 }
     
 wchar_t Screen::getTextSymbol(int row, int col)
 {
-  if((row >= rows) || (col >= strings_lens[row]))
+  int start_row = centrate_vert ? ((rows - *read_strings) / 2) : 0;
+  row -= start_row;
+
+  int start_col = centrate_horiz ? ((cols - strings_lens[row]) / 2) : 0;
+  col -= start_col;
+
+
+  if((row < 0) || (row >= (int)*read_strings) 
+      || (col < 0) || (col >= (int)strings_lens[row]))
   {
     return ' ';
   }
@@ -156,13 +211,13 @@ void Screen::playAnimation(char *usr_cmd)
   bool animation_started = false;
   bool animation_stopped = false;
 
-  for(int i = 0; i < cols; ++i)
+  for(size_t i = 0; i < cols; ++i)
   {
     col_lengths[i] = 1 + rand() % max_col_length;
     col_offsets[i] = rand() % max_col_length;
   }
 
-  for(int i = 0; true; ++i)
+  for(size_t i = 0; true; ++i)
   {
     if(checkInput())
     {
@@ -179,24 +234,24 @@ void Screen::playAnimation(char *usr_cmd)
     }
     animation_stopped = true;
     
-    for(int j = 0; j < cols; ++j)
+    for(size_t j = 0; j < cols; ++j)
     {
       int col_start = i - col_offsets[j];
       int col_end = i - col_offsets[j] - col_lengths[j];
       int text_start = col_end - tail_length - 1;
 
-      if((col_start < 0) || (text_start >= rows))
+      if((col_start < 0) || (text_start >= (int)rows))
       {
         continue;
       }
 
-      if((col_start >= 1) && (col_start <= rows))
+      if((col_start >= 1) && (col_start <= (int)rows))
       {
         updateSymbol(col_start - 1, j, first_chars[j]);
         animation_stopped = false;
       }
 
-      if(col_start < rows)
+      if(col_start < (int)rows)
       {
         first_chars[j] = getRandomSymbol();
         updateSymbol(col_start, j, first_chars[j], true);
@@ -212,13 +267,13 @@ void Screen::playAnimation(char *usr_cmd)
       }
 
       int fade_col_id = (col_end - 1) - rand() % tail_length;
-      if((fade_col_id >= 0) && (fade_col_id < rows))
+      if((fade_col_id >= 0) && (fade_col_id < (int)rows))
       {
         updateSymbol(fade_col_id, j, getTextSymbol(fade_col_id, j));
         animation_stopped = false;
       }
 
-      if((text_start >= 0) && (text_start < rows))
+      if((text_start >= 0) && (text_start < (int)rows))
       {
         updateSymbol(text_start, j, getTextSymbol(text_start, j));
         animation_stopped = false;
@@ -229,10 +284,12 @@ void Screen::playAnimation(char *usr_cmd)
   }
 }
 
-void Screen::setTextInfo(wchar_t *_text, size_t *_strings_lens)
+void Screen::setTextInfo(wchar_t *_text, size_t *_strings_lens, 
+    size_t *_read_strings)
 {
   text = _text;
   strings_lens = _strings_lens;
+  read_strings = _read_strings;
 }
     
 void Screen::waitForInput(char *usr_cmd)
@@ -254,30 +311,15 @@ bool Screen::checkInput()
   return false;
 }
 
-struct CmdLineArgs
-{
-  int delay,
-      rand_columns_len;
-  bool onepage,
-       noninteract;
-  char filename[FILENAME_MAX + 1];
-  CmdLineArgs();
-};
-
-CmdLineArgs::CmdLineArgs()
-{
-  delay = 80;
-  rand_columns_len = 0;
-  onepage = false;
-  noninteract = false;
-  filename[0] = '\0';
-}
-
 static struct argp_option options[] = {
-  {"delay", 'd', "value",  0, "Delay between redraws in ms, default 80"},
-  {"rand_len", 'l', "value",  0, "Max length of random symbols columns"},
-  {"onepage", 'o', NULL,  0, "Show only one page"},
-  {"non-interact", 'n', NULL,  0, "Run in non-interactive mode"},
+  {"delay", 'd', "value",  0, "Delay between redraws in ms, default "
+    DEFAULT_DELAY_STR, 1},
+  {"rand_len", 'l', "value",  0, "Max length of random symbols columns", 1},
+  {"onepage", 'o', NULL,  0, "Show only one page", 2},
+  {"non-interact", 'n', NULL,  0, "Run in non-interactive mode", 2},
+  {"colorize", 'c', NULL,  0, "Colorize output", 3},
+  {"centrate-horiz", 'C', NULL,  0, "Centrate text horizontally", 3},
+  {"centrate-vert", 'v', NULL,  0, "Centrate text vertically", 3},
   {0}
 };
 
@@ -299,6 +341,15 @@ static error_t parseOptions(int key, char *arg, struct argp_state *state)
     case 'n':
       args->noninteract = true;
       break;
+    case 'c':
+      args->colorize = true;
+      break;
+    case 'C':
+      args->centrate_horiz = true;
+      break;
+    case 'v':
+      args->centrate_vert = true;
+      break;
     case 0:
       strncpy(args->filename, arg, FILENAME_MAX);
       break;
@@ -310,7 +361,7 @@ static error_t parseOptions(int key, char *arg, struct argp_state *state)
 
 int parseCmdLine(CmdLineArgs *args, int argc, char *argv[])
 {
-  argp argp_opts = {options, parseOptions};
+  argp argp_opts = {options, parseOptions, "file"};
 
   return argp_parse (&argp_opts, argc, argv, 0, 0, args);
 }
@@ -321,6 +372,7 @@ int main(int argc, char *argv[])
   Screen *screen = NULL;
   wchar_t *text = NULL;
   size_t *strings_lens;
+  size_t read_strings = 0;
   CmdLineArgs args;
   FILE *file = stdin;
 
@@ -340,10 +392,10 @@ int main(int argc, char *argv[])
   {
     setlocale(LC_CTYPE, "");
     srand(time(NULL));
-    screen = new Screen(args.delay, args.rand_columns_len);
+    screen = new Screen(&args);
     text = new wchar_t[screen->rows * screen->cols];
     strings_lens = new size_t[screen->rows];
-    screen->setTextInfo(text, strings_lens);
+    screen->setTextInfo(text, strings_lens, &read_strings);
   }
   else
   {
@@ -361,22 +413,22 @@ int main(int argc, char *argv[])
       fputws(text, stdout);
       continue;
     }
-    int str_num = 0;
     wchar_t *text_tmp = text;
     memset(strings_lens, 0, sizeof(size_t) * screen->rows);
 
-    for(;(str_num < screen->rows) && fgetws(text_tmp, STR_LEN, file); 
-        ++str_num)
+    for(read_strings = 0; 
+        (read_strings < screen->rows) && fgetws(text_tmp, STR_LEN, file); 
+        ++read_strings)
     {
-      strings_lens[str_num] = wcslen(text_tmp);
-      if(text_tmp[strings_lens[str_num] - 1] == '\n')
+      strings_lens[read_strings] = wcslen(text_tmp);
+      if(text_tmp[strings_lens[read_strings] - 1] == '\n')
       {
-        --strings_lens[str_num];
-        text_tmp[strings_lens[str_num]] = '\0';
+        --strings_lens[read_strings];
+        text_tmp[strings_lens[read_strings]] = '\0';
       }
       text_tmp += screen->cols;
     }
-    if(!str_num)
+    if(!read_strings)
     {
       break;
     }
