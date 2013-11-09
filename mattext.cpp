@@ -461,13 +461,13 @@ int main(int argc, char *argv[])
     char usr_cmd = 0;
     screen->playAnimation(&usr_cmd);
 
-    if(args.onepage)
-    {
-      break;
-    }
     if(!args.noninteract && (usr_cmd == 0))
     {
       screen->waitForInput(&usr_cmd);
+    }
+    if(args.onepage)
+    {
+      break;
     }
     if(checkQuit(&usr_cmd))
     {
