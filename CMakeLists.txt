@@ -51,3 +51,7 @@ if(NOT CURSES_HAS_WCHAR)
     endif()
   endforeach()
 endif()
+
+if(NOT CURSES_HAS_WCHAR)
+  message(FATAL_ERROR "Ncurses does not support wide characters!")
+endif()
