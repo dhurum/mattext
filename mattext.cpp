@@ -53,7 +53,9 @@ struct CmdLineArgs
        noninteract,
        colorize,
        centrate_horiz,
-       centrate_vert;
+       centrate_vert,
+       without_japanese,
+       infinite;
   char filename[FILENAME_MAX + 1];
   CmdLineArgs();
 };
@@ -67,6 +69,7 @@ CmdLineArgs::CmdLineArgs()
   colorize = false;
   centrate_horiz = false;
   centrate_vert = false;
+  without_japanese = false;
   filename[0] = '\0';
 }
 
@@ -96,10 +99,12 @@ class Screen
     struct timeval select_tm;
     bool colorize,
          centrate_horiz,
-         centrate_vert;
+         centrate_vert,
+         without_japanese;
 
     wchar_t getTextSymbol(int row, int col);
     bool checkInput();
+    wchar_t getRandomSymbol();
     void updateSymbol(int col, int row, wchar_t symbol, bool bold);
 };
 
@@ -116,6 +121,7 @@ Screen::Screen(CmdLineArgs *args)
   colorize = has_colors() ? args->colorize : false;
   centrate_horiz = args->centrate_horiz;
   centrate_vert = args->centrate_vert;
+  without_japanese = args->without_japanese;
   
   if(colorize)
   {
@@ -156,9 +162,11 @@ Screen::~Screen()
   close(tty_fno);
 }
 
-static wchar_t getRandomSymbol()
+wchar_t Screen::getRandomSymbol()
 {
-  switch(rand() % 4)
+  int base = without_japanese ? 3 : 4;
+
+  switch(rand() % base)
   {
     case 0:
       return 0x30 + rand() % 9;
@@ -247,7 +255,8 @@ void Screen::playAnimation(char *usr_cmd)
 
       if((col_start >= 1) && (col_start <= (int)rows))
       {
-        updateSymbol(col_start - 1, j, first_chars[j]);
+        bool bold = ((rand() % 100) > 90) ? true : false;
+        updateSymbol(col_start - 1, j, first_chars[j], bold);
         animation_stopped = false;
       }
 
@@ -262,7 +271,8 @@ void Screen::playAnimation(char *usr_cmd)
       int row_id = rand() % cols;
       if((row_id >= col_end) && (row_id < col_start))
       {
-        updateSymbol(row_id, j, getRandomSymbol());
+        bool bold = ((rand() % 100) > 60) ? true : false;
+        updateSymbol(row_id, j, getRandomSymbol(), bold);
         animation_stopped = false;
       }
 
@@ -317,9 +327,11 @@ static struct argp_option options[] = {
   {"rand_len", 'l', "value",  0, "Max length of random symbols columns", 1},
   {"onepage", 'o', NULL,  0, "Show only one page", 2},
   {"non-interact", 'n', NULL,  0, "Run in non-interactive mode", 2},
+  {"infinite", 'i', NULL,  0, "At the end of file start reading it from the beginning", 2},
   {"colorize", 'c', NULL,  0, "Colorize output", 3},
   {"centrate-horiz", 'C', NULL,  0, "Centrate text horizontally", 3},
   {"centrate-vert", 'v', NULL,  0, "Centrate text vertically", 3},
+  {"without-japanese", 'e', NULL,  0, "Do not use Japanese symbols", 4},
   {0}
 };
 
@@ -341,6 +353,9 @@ static error_t parseOptions(int key, char *arg, struct argp_state *state)
     case 'n':
       args->noninteract = true;
       break;
+    case 'i':
+      args->infinite = true;
+      break;
     case 'c':
       args->colorize = true;
       break;
@@ -349,6 +364,9 @@ static error_t parseOptions(int key, char *arg, struct argp_state *state)
       break;
     case 'v':
       args->centrate_vert = true;
+      break;
+    case 'e':
+      args->without_japanese = true;
       break;
     case 0:
       strncpy(args->filename, arg, FILENAME_MAX);
@@ -430,7 +448,15 @@ int main(int argc, char *argv[])
     }
     if(!read_strings)
     {
-      break;
+      if(!args.infinite)
+      {
+        break;
+      }
+      if(file != stdin)
+      {
+        fseek(file, 0,SEEK_SET);
+        continue;
+      }
     }
     char usr_cmd = 0;
     screen->playAnimation(&usr_cmd);

@@ -5,6 +5,8 @@ project(${TARGET})
 
 find_package(Curses)
 
+set(${TARGET}_LIBS ncursesw)
+
 set(CMAKE_CXX_FLAGS 
   " -Werror" 
   " -Wall"
@@ -14,7 +16,6 @@ set(CMAKE_CXX_FLAGS
   " -Wclobbered"
   " -Wempty-body"
 )
-
 #transform list to string
 string(REPLACE ";" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 
@@ -25,7 +26,32 @@ set(${TARGET}_SRCS
 add_executable(${TARGET} ${${TARGET}_SRCS})
 
 target_link_libraries(${TARGET}
-  cursesw
+  ${${TARGET}_LIBS}
 )
 
 install(TARGETS ${TARGET} DESTINATION bin)
+
+#check if we need to include some dir to get curses with wchar_t support
+include(CheckCXXSymbolExists)
+set(CMAKE_REQUIRED_LIBRARIES ${${TARGET}_LIBS})
+CHECK_CXX_SYMBOL_EXISTS(setcchar "${CURSES_INCLUDE_PATH}/curses.h" 
+  CURSES_HAS_WCHAR)
+
+if(NOT CURSES_HAS_WCHAR)
+  file(GLOB CURSES_SUBDIRS "${CURSES_INCLUDE_PATH}/*curses*")
+  foreach(CURSES_SUBDIR ${CURSES_SUBDIRS})
+    if(IS_DIRECTORY ${CURSES_SUBDIR})
+      unset(CURSES_HAS_WCHAR CACHE)
+      CHECK_CXX_SYMBOL_EXISTS(setcchar "${CURSES_SUBDIR}/curses.h" 
+        CURSES_HAS_WCHAR)
+      if(${CURSES_HAS_WCHAR})
+        include_directories(${CURSES_SUBDIR})
+        break()
+      endif()
+    endif()
+  endforeach()
+endif()
+
+if(NOT CURSES_HAS_WCHAR)
+  message(FATAL_ERROR "Ncurses does not support wide characters!")
+endif()
