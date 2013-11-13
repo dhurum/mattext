@@ -1,7 +1,7 @@
 ##Simple matrix-style pager
 
 Shows text with matrix-style rain-of-symbols animation during page changes.  
-Usage: `mattext [options] filename` or `cat filename | mattext [options]`.
+Usage: `mattext [options] file1 [file2 ...]` or `cat file | mattext [options]`.
 
 ###Options:
 * `d`, `delay` - Delay between screen redraws, in ms, default 80;
