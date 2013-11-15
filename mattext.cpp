@@ -36,6 +36,7 @@ OF SUCH DAMAGE.
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <argp.h>
+#include <list>
 
 #define STR_LEN 1024
 #define DEFAULT_DELAY 80
@@ -43,7 +44,7 @@ OF SUCH DAMAGE.
 #define _MAKE_STR(a) __MAKE_STR(a)
 #define DEFAULT_DELAY_STR _MAKE_STR(DEFAULT_DELAY)
 
-const char *argp_program_version = "0.2";
+using std::list;
 
 struct CmdLineArgs
 {
@@ -56,8 +57,18 @@ struct CmdLineArgs
        centrate_vert,
        without_japanese,
        infinite;
-  char filename[FILENAME_MAX + 1];
+
   CmdLineArgs();
+  ~CmdLineArgs();
+  void addFile(char *name);
+  FILE* getNextFile();
+  bool checkFiles();
+
+  private:
+    list<FILE*> files;
+    list<FILE*>::iterator file_it;
+    bool stdin_returned,
+         real_files;
 };
 
 CmdLineArgs::CmdLineArgs()
@@ -70,7 +81,78 @@ CmdLineArgs::CmdLineArgs()
   centrate_horiz = false;
   centrate_vert = false;
   without_japanese = false;
-  filename[0] = '\0';
+  infinite = false;
+    
+  stdin_returned = false;
+  real_files = false;
+}
+
+CmdLineArgs::~CmdLineArgs()
+{
+  for(list<FILE*>::iterator it = files.begin(); it != files.end(); ++it)
+  {
+    fclose(*it);
+  }
+}
+
+void CmdLineArgs::addFile(char *name)
+{
+  size_t len = strlen(name);
+  if(!len)
+  {
+    return;
+  }
+
+  real_files = true;
+  FILE *file = fopen(name, "r");
+
+  if(!file)
+  {
+    fprintf(stderr, "Can't open file %s!\n", name);
+    return;
+  }
+  
+  files.push_back(file);
+  file_it = files.begin();
+}
+  
+bool CmdLineArgs::checkFiles()
+{
+  if(real_files && files.empty())
+  {
+    return false;
+  }
+  return true;
+}
+
+FILE* CmdLineArgs::getNextFile()
+{
+  if(files.empty())
+  {
+    if(stdin_returned && !infinite)
+    {
+      return NULL;
+    }
+
+    stdin_returned = true;
+    return stdin;
+  }
+
+  if(file_it == files.end())
+  {
+    if(!infinite)
+    {
+      return NULL;
+    }
+    file_it = files.begin();
+  }
+
+  fseek(*file_it, 0,SEEK_SET);
+
+  FILE *ret = *file_it;
+  ++file_it;
+
+  return ret;
 }
 
 class Screen
@@ -369,7 +451,7 @@ static error_t parseOptions(int key, char *arg, struct argp_state *state)
       args->without_japanese = true;
       break;
     case 0:
-      strncpy(args->filename, arg, FILENAME_MAX);
+      args->addFile(arg);
       break;
     default:
       return ARGP_ERR_UNKNOWN;
@@ -379,7 +461,7 @@ static error_t parseOptions(int key, char *arg, struct argp_state *state)
 
 int parseCmdLine(CmdLineArgs *args, int argc, char *argv[])
 {
-  argp argp_opts = {options, parseOptions, "file"};
+  argp argp_opts = {options, parseOptions, "file1 file2 ..."};
 
   return argp_parse (&argp_opts, argc, argv, 0, 0, args);
 }
@@ -392,19 +474,17 @@ int main(int argc, char *argv[])
   size_t *strings_lens;
   size_t read_strings = 0;
   CmdLineArgs args;
-  FILE *file = stdin;
+  FILE *file = NULL;
 
   parseCmdLine(&args, argc, argv);
   
-  if(args.filename[0] != '\0')
+  if(!args.checkFiles())
   {
-    file = fopen(args.filename, "r");
-    if(!file)
-    {
-      fprintf(stderr, "Can't open file %s!\n", args.filename);
+      fprintf(stderr, "Can't open any of given files!\n");
       exit(1);
-    }
   }
+  
+  file = args.getNextFile();
 
   if(is_tty)
   {
@@ -448,13 +528,14 @@ int main(int argc, char *argv[])
     }
     if(!read_strings)
     {
-      if(!args.infinite)
+
+      file = args.getNextFile();
+      if(!file)
       {
         break;
       }
       if(file != stdin)
       {
-        fseek(file, 0,SEEK_SET);
         continue;
       }
     }
@@ -480,10 +561,6 @@ int main(int argc, char *argv[])
   {
     delete[] strings_lens;
     delete screen;
-  }
-  if(file != stdin)
-  {
-    fclose(file);
   }
   return 0;
 }
