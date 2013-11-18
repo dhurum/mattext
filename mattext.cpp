@@ -54,6 +54,7 @@ struct CmdLineArgs
        noninteract,
        colorize,
        centrate_horiz,
+       centrate_horiz_longest,
        centrate_vert,
        without_japanese,
        infinite;
@@ -79,6 +80,7 @@ CmdLineArgs::CmdLineArgs()
   noninteract = false;
   colorize = false;
   centrate_horiz = false;
+  centrate_horiz_longest = false;
   centrate_vert = false;
   without_japanese = false;
   infinite = false;
@@ -163,7 +165,8 @@ class Screen
     Screen(CmdLineArgs *args);
     ~Screen();
     void playAnimation(char *usr_cmd);
-    void setTextInfo(wchar_t *text, size_t *strings_lens, size_t *read_strings);
+    void setTextInfo(wchar_t *text, size_t *strings_lens, size_t *longest_str, 
+            size_t *read_strings);
     void waitForInput(char *usr_cmd);
 
   private:
@@ -176,11 +179,13 @@ class Screen
     wchar_t *first_chars,
             *text;
     size_t *strings_lens,
+           *longest_str,
            *read_strings;
     fd_set fds;
     struct timeval select_tm;
     bool colorize,
          centrate_horiz,
+         centrate_horiz_longest,
          centrate_vert,
          without_japanese;
 
@@ -202,6 +207,7 @@ Screen::Screen(CmdLineArgs *args)
   
   colorize = has_colors() ? args->colorize : false;
   centrate_horiz = args->centrate_horiz;
+  centrate_horiz_longest = args->centrate_horiz_longest;
   centrate_vert = args->centrate_vert;
   without_japanese = args->without_japanese;
   
@@ -275,7 +281,8 @@ wchar_t Screen::getTextSymbol(int row, int col)
   int start_row = centrate_vert ? ((rows - *read_strings) / 2) : 0;
   row -= start_row;
 
-  int start_col = centrate_horiz ? ((cols - strings_lens[row]) / 2) : 0;
+  size_t str_len = centrate_horiz_longest ? *longest_str : strings_lens[row];
+  int start_col = centrate_horiz ? ((cols - str_len) / 2) : 0;
   col -= start_col;
 
 
@@ -377,10 +384,11 @@ void Screen::playAnimation(char *usr_cmd)
 }
 
 void Screen::setTextInfo(wchar_t *_text, size_t *_strings_lens, 
-    size_t *_read_strings)
+    size_t *_longest_str, size_t *_read_strings)
 {
   text = _text;
   strings_lens = _strings_lens;
+  longest_str = _longest_str;
   read_strings = _read_strings;
 }
     
@@ -404,14 +412,17 @@ bool Screen::checkInput()
 }
 
 static struct argp_option options[] = {
-  {"delay", 'd', "value",  0, "Delay between redraws in ms, default "
+  {"delay", 'd', "value",  0, "Delay between redraws in milliseconds, default "
     DEFAULT_DELAY_STR, 1},
-  {"rand_len", 'l', "value",  0, "Max length of random symbols columns", 1},
+  {"rand-len", 'l', "value",  0, "Max length of random symbols columns", 1},
   {"onepage", 'o', NULL,  0, "Show only one page", 2},
   {"non-interact", 'n', NULL,  0, "Run in non-interactive mode", 2},
-  {"infinite", 'i', NULL,  0, "At the end of file start reading it from the beginning", 2},
+  {"infinite", 'i', NULL,  0, 
+    "At the end of file start reading it from the beginning", 2},
   {"colorize", 'c', NULL,  0, "Colorize output", 3},
   {"centrate-horiz", 'C', NULL,  0, "Centrate text horizontally", 3},
+  {"centrate-horiz-longest", 'L', NULL,  0, 
+    "Centrate text horizontally by longest string", 3},
   {"centrate-vert", 'v', NULL,  0, "Centrate text vertically", 3},
   {"without-japanese", 'e', NULL,  0, "Do not use Japanese symbols", 4},
   {0}
@@ -444,6 +455,10 @@ static error_t parseOptions(int key, char *arg, struct argp_state *state)
     case 'C':
       args->centrate_horiz = true;
       break;
+    case 'L':
+      args->centrate_horiz = true;
+      args->centrate_horiz_longest = true;
+      break;
     case 'v':
       args->centrate_vert = true;
       break;
@@ -472,6 +487,7 @@ int main(int argc, char *argv[])
   Screen *screen = NULL;
   wchar_t *text = NULL;
   size_t *strings_lens;
+  size_t longest_str;
   size_t read_strings = 0;
   CmdLineArgs args;
   FILE *file = NULL;
@@ -493,7 +509,7 @@ int main(int argc, char *argv[])
     screen = new Screen(&args);
     text = new wchar_t[screen->rows * screen->cols];
     strings_lens = new size_t[screen->rows];
-    screen->setTextInfo(text, strings_lens, &read_strings);
+    screen->setTextInfo(text, strings_lens, & longest_str, &read_strings);
   }
   else
   {
@@ -513,6 +529,7 @@ int main(int argc, char *argv[])
     }
     wchar_t *text_tmp = text;
     memset(strings_lens, 0, sizeof(size_t) * screen->rows);
+    longest_str = 0;
 
     for(read_strings = 0; 
         (read_strings < screen->rows) && fgetws(text_tmp, STR_LEN, file); 
@@ -525,6 +542,10 @@ int main(int argc, char *argv[])
         text_tmp[strings_lens[read_strings]] = '\0';
       }
       text_tmp += screen->cols;
+      if(strings_lens[read_strings] > longest_str)
+      {
+        longest_str = strings_lens[read_strings];
+      }
     }
     if(!read_strings)
     {

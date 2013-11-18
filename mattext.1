@@ -1,0 +1,65 @@
+.TH mattext 1 "18 November 2013"
+.SH NAME
+mattext \- Simple matrix\-style pager.
+
+.SH USAGE
+.B mattext 
+.RB [\| \-d
+.IR delay \|] 
+.RB [\| \-l 
+.IR length \|]
+.RB [\| \-o \|]
+.RB [\| \-n \|]
+.RB [\| \-i \|]
+.RB [\| \-c \|]
+.RB [\| \-C \|]
+.RB [\| \-V \|]
+.RB [\| \-e \|]
+.RI [\| file \ .\|.\|. \| ]
+
+.SH DESCRIPTION
+.PP
+Mattext shows text with matrix\-style rain\-of\-symbols animation during page changes.
+
+.SH COMMANDS
+.TP
+.B q or Q
+Exit program.
+.TP
+.B any other key
+Show next page.
+
+.SH OPTIONS
+.TP
+.B \-d\ \fIdelay\fR,\ \fB\-\-delay\ \fIdelay
+Delay between screen redraws, in ms, default 80.
+.TP
+.B \-l\ \fIlength\fR,\ \fB\-\-rand-len\ \fIlength
+Maximum length of random symbols columns.
+.TP
+.B \-o\fR,\ \fB\-\-onepage
+Show only one page, then exit.
+.TP
+.B \-n\fR,\ \fB\-\-non\-interact
+Do not wait for user input before showing next page.
+.TP
+.B \-i\fR,\ \fB\-\-infinite
+At the end of file start reading it from the beginning.
+.TP
+.B \-c\fR,\ \fB\-\-colorize
+Colorize output.
+.TP
+.B \-C\fR,\ \fB\-\-centrate\-horiz
+Centrate text horizontally.
+.TP
+.B \-L\fR,\ \fB\-\-centrate\-horiz\-longest
+Centrate text horizontally by longest string.
+.TP
+.B \-v\fR,\ \fB\-\-centrate\-vert
+Centrate text vertically.
+.TP
+.B \-e\fR,\ \fB\-\-without\-japanese
+Do not use Japanese symbols.
+
+.SH AUTHOR
+Denis Tikhomirov (dvtikhomirov@gmail.com)
