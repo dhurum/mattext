@@ -5,22 +5,22 @@ Copyright 2013, Denis Tikhomirov. All rights reserved.
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-1. Redistributions of source code must retain the above copyright notice, this 
+1. Redistributions of source code must retain the above copyright notice, this
    list of conditions and the following disclaimer.
 
-2. Redistributions in binary form must reproduce the above copyright notice, 
-   this list of conditions and the following disclaimer in the documentation 
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
    and/or other materials provided with the distribution.
 
-THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, 
+THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
 INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
 FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR OR
-CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, 
-OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
-SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING 
-IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 OF SUCH DAMAGE.
 
 *******************************************************************************/
@@ -84,7 +84,7 @@ CmdLineArgs::CmdLineArgs()
   centrate_vert = false;
   without_japanese = false;
   infinite = false;
-    
+
   stdin_returned = false;
   real_files = false;
 }
@@ -113,11 +113,11 @@ void CmdLineArgs::addFile(char *name)
     fprintf(stderr, "Can't open file %s!\n", name);
     return;
   }
-  
+
   files.push_back(file);
   file_it = files.begin();
 }
-  
+
 bool CmdLineArgs::checkFiles()
 {
   if(real_files && files.empty())
@@ -169,10 +169,10 @@ class Screen
            cols;
     Screen(CmdLineArgs *args);
     ~Screen();
-    void playAnimation(char *usr_cmd);
-    void setTextInfo(wchar_t *text, size_t *strings_lens, size_t *longest_str, 
+    void playAnimation(int *usr_cmd);
+    void setTextInfo(wchar_t *text, size_t *strings_lens, size_t *longest_str,
             size_t *read_strings);
-    void waitForInput(char *usr_cmd);
+    void waitForInput(int *usr_cmd);
 
   private:
     int *col_lengths,
@@ -209,13 +209,13 @@ Screen::Screen(CmdLineArgs *args)
   cbreak();
   curs_set(0);
   getmaxyx(stdscr, rows, cols);
-  
+
   colorize = has_colors() ? args->colorize : false;
   centrate_horiz = args->centrate_horiz;
   centrate_horiz_longest = args->centrate_horiz_longest;
   centrate_vert = args->centrate_vert;
   without_japanese = args->without_japanese;
-  
+
   if(colorize)
   {
      start_color();
@@ -267,7 +267,7 @@ wchar_t Screen::getRandomSymbol()
       return 0x41 + rand() % 26;
     case 2:
       return 0x61 + rand() % 26;
-    default: 
+    default:
       return 0xff66 + rand() % 58;
   }
 }
@@ -280,7 +280,7 @@ void Screen::updateSymbol(int col, int row, wchar_t symbol, bool bold = false)
   setcchar(&out_char, &symbol, bold? A_BOLD : A_NORMAL, pair, NULL);
   mvadd_wch(col, row, &out_char);
 }
-    
+
 wchar_t Screen::getTextSymbol(int row, int col)
 {
   int start_row = centrate_vert ? ((rows - *read_strings) / 2) : 0;
@@ -291,7 +291,7 @@ wchar_t Screen::getTextSymbol(int row, int col)
   col -= start_col;
 
 
-  if((row < 0) || (row >= (int)*read_strings) 
+  if((row < 0) || (row >= (int)*read_strings)
       || (col < 0) || (col >= (int)strings_lens[row]))
   {
     return ' ';
@@ -299,16 +299,16 @@ wchar_t Screen::getTextSymbol(int row, int col)
   return text[row * cols + col];
 }
 
-static bool checkQuit(char *usr_cmd)
+static bool checkQuit(int *usr_cmd)
 {
-  if((*usr_cmd == 'q') || (*usr_cmd == 'Q'))
+  if((*usr_cmd == 'q') || (*usr_cmd == 'Q') || (*usr_cmd == '\4'))
   {
     return true;
   }
   return false;
 }
 
-void Screen::playAnimation(char *usr_cmd)
+void Screen::playAnimation(int *usr_cmd)
 {
   bool animation_started = false;
   bool animation_stopped = false;
@@ -335,7 +335,7 @@ void Screen::playAnimation(char *usr_cmd)
       break;
     }
     animation_stopped = true;
-    
+
     for(size_t j = 0; j < cols; ++j)
     {
       int col_start = i - col_offsets[j];
@@ -388,7 +388,7 @@ void Screen::playAnimation(char *usr_cmd)
   }
 }
 
-void Screen::setTextInfo(wchar_t *_text, size_t *_strings_lens, 
+void Screen::setTextInfo(wchar_t *_text, size_t *_strings_lens,
     size_t *_longest_str, size_t *_read_strings)
 {
   text = _text;
@@ -396,12 +396,12 @@ void Screen::setTextInfo(wchar_t *_text, size_t *_strings_lens,
   longest_str = _longest_str;
   read_strings = _read_strings;
 }
-    
-void Screen::waitForInput(char *usr_cmd)
+
+void Screen::waitForInput(int *usr_cmd)
 {
-  read(tty_fno, usr_cmd, 1);
+  read(tty_fno, usr_cmd, sizeof(int));
 }
-    
+
 bool Screen::checkInput()
 {
   FD_ZERO(&fds);
@@ -422,11 +422,11 @@ static struct argp_option options[] = {
   {"rand-len", 'l', "value",  0, "Max length of random symbols columns", 1},
   {"onepage", 'o', NULL,  0, "Show only one page", 2},
   {"non-interact", 'n', NULL,  0, "Run in non-interactive mode", 2},
-  {"infinite", 'i', NULL,  0, 
+  {"infinite", 'i', NULL,  0,
     "At the end of file start reading it from the beginning", 2},
   {"colorize", 'c', NULL,  0, "Colorize output", 3},
   {"centrate-horiz", 'C', NULL,  0, "Centrate text horizontally", 3},
-  {"centrate-horiz-longest", 'L', NULL,  0, 
+  {"centrate-horiz-longest", 'L', NULL,  0,
     "Centrate text horizontally by longest string", 3},
   {"centrate-vert", 'v', NULL,  0, "Centrate text vertically", 3},
   {"without-japanese", 'e', NULL,  0, "Do not use Japanese symbols", 4},
@@ -498,13 +498,13 @@ int main(int argc, char *argv[])
   FILE *file = NULL;
 
   parseCmdLine(&args, argc, argv);
-  
+
   if(!args.checkFiles())
   {
       fprintf(stderr, "Can't open any of given files!\n");
       exit(1);
   }
-  
+
   file = args.getNextFile();
 
   if(is_tty)
@@ -568,7 +568,7 @@ int main(int argc, char *argv[])
         }
       }
     }
-    char usr_cmd = 0;
+    int usr_cmd = 0;
     screen->playAnimation(&usr_cmd);
 
     if(args.onepage)

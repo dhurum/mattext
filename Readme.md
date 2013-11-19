@@ -16,7 +16,7 @@ Usage: `mattext [options] file1 [file2 ...]` or `cat file | mattext [options]`.
 * `-e`, `--without-japanese` - Do not use Japanese symbols;
 
 ###Commands:
-* `q` or `Q` - Exit program;
+* `q` or `Q` or `ctrl + D` - Exit program;
 * any other key - Show next page;
 
 ###Troubleshooting:
