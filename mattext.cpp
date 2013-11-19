@@ -135,6 +135,11 @@ FILE* CmdLineArgs::getNextFile()
     {
       return NULL;
     }
+    if(!stdin_returned)
+    {
+      int flags = fcntl(fileno(stdin), F_GETFL, 0);
+      fcntl(fileno(stdin), F_SETFL, flags | O_NONBLOCK);
+    }
 
     stdin_returned = true;
     return stdin;
@@ -550,15 +555,17 @@ int main(int argc, char *argv[])
     }
     if(!read_strings)
     {
-
-      file = args.getNextFile();
-      if(!file)
+      if(errno != EWOULDBLOCK)
       {
-        break;
-      }
-      if(file != stdin)
-      {
-        continue;
+        file = args.getNextFile();
+        if(!file)
+        {
+          break;
+        }
+        if(file != stdin)
+        {
+          continue;
+        }
       }
     }
     char usr_cmd = 0;
@@ -584,5 +591,6 @@ int main(int argc, char *argv[])
     delete[] strings_lens;
     delete screen;
   }
+
   return 0;
 }
