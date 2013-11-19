@@ -29,7 +29,15 @@ target_link_libraries(${TARGET}
   ${${TARGET}_LIBS}
 )
 
+#compress manpage
+set(MANPAGE_GZ ${CMAKE_BINARY_DIR}/mattext.1.gz)
+add_custom_command(OUTPUT ${MANPAGE_GZ} 
+  COMMAND gzip -c ${CMAKE_SOURCE_DIR}/mattext.1 > ${MANPAGE_GZ})
+
+add_custom_target(MANPAGE ALL DEPENDS ${MANPAGE_GZ})
+
 install(TARGETS ${TARGET} DESTINATION bin)
+install(FILES ${MANPAGE_GZ} DESTINATION share/man/man1)
 
 #check if we need to include some dir to get curses with wchar_t support
 include(CheckCXXSymbolExists)
