@@ -507,7 +507,8 @@ int main(int argc, char *argv[])
     setlocale(LC_CTYPE, "");
     srand(time(NULL));
     screen = new Screen(&args);
-    text = new wchar_t[screen->rows * screen->cols];
+    //We need rows * cols characters + one trailing '\0';
+    text = new wchar_t[screen->rows * screen->cols + 1];
     strings_lens = new size_t[screen->rows];
     screen->setTextInfo(text, strings_lens, & longest_str, &read_strings);
   }
@@ -531,8 +532,8 @@ int main(int argc, char *argv[])
     memset(strings_lens, 0, sizeof(size_t) * screen->rows);
     longest_str = 0;
 
-    for(read_strings = 0; 
-        (read_strings < screen->rows) && fgetws(text_tmp, STR_LEN, file); 
+    for(read_strings = 0;
+        (read_strings < screen->rows) && fgetws(text_tmp, screen->cols + 1, file);
         ++read_strings)
     {
       strings_lens[read_strings] = wcslen(text_tmp);
