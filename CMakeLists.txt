@@ -3,21 +3,27 @@ cmake_minimum_required(VERSION 2.8)
 set(TARGET mattext)
 project(${TARGET})
 
+#fix curses include and lib paths for OSX
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  set(CURSES_LIBRARY "/usr/lib/libncursesw.so")
+  set(CURSES_INCLUDE_PATH "/usr/include")
+endif()
+
 find_package(Curses)
 
 set(${TARGET}_LIBS ncursesw)
 
-set(CMAKE_CXX_FLAGS 
-  " -Werror" 
-  " -Wall"
-  " -Wuninitialized"
-  " -Winit-self"
-  " -Wtype-limits"
-  " -Wclobbered"
-  " -Wempty-body"
+set(CMAKE_CXX_FLAGS
+  -Werror
+  -Wall
+  -Wuninitialized
+  -Winit-self
+  -Wtype-limits
+  -Wclobbered
+  -Wempty-body
 )
 #transform list to string
-string(REPLACE ";" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 set(${TARGET}_SRCS 
   mattext.cpp
