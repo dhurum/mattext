@@ -41,6 +41,7 @@ install(FILES ${MANPAGE_GZ} DESTINATION share/man/man1)
 
 #check if we need to include some dir to get curses with wchar_t support
 include(CheckCXXSymbolExists)
+set(CMAKE_REQUIRED_DEFINITIONS -D_XOPEN_SOURCE_EXTENDED)
 set(CMAKE_REQUIRED_LIBRARIES ${${TARGET}_LIBS})
 CHECK_CXX_SYMBOL_EXISTS(setcchar "${CURSES_INCLUDE_PATH}/curses.h" 
   CURSES_HAS_WCHAR)
