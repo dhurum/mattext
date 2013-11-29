@@ -5,13 +5,17 @@ project(${TARGET})
 
 #fix curses include and lib paths for OSX
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set(CURSES_LIBRARY "/usr/lib/libncursesw.so")
-  set(CURSES_INCLUDE_PATH "/usr/include")
+  set(CURSES_NCURSES_LIBRARY "/usr/lib/libncursesw.so" CACHE FILEPATH "Ncurses library")
+  set(CURSES_INCLUDE_PATH "/usr/include" CACHE PATH "Ncurses include dir")
 endif()
 
 find_package(Curses)
 
-set(${TARGET}_LIBS ncursesw)
+if(CURSES_NCURSES_LIBRARY MATCHES NOTFOUND)
+  message(FATAL_ERROR "Ncurses library not found!")
+endif()
+
+string(REPLACE "s." "sw." CURSES_NCURSES_LIBRARY "${CURSES_NCURSES_LIBRARY}")
 
 set(CMAKE_CXX_FLAGS
   -Werror
@@ -25,19 +29,19 @@ set(CMAKE_CXX_FLAGS
 #transform list to string
 string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
-set(${TARGET}_SRCS 
+set(${TARGET}_SRCS
   mattext.cpp
 )
 
 add_executable(${TARGET} ${${TARGET}_SRCS})
 
 target_link_libraries(${TARGET}
-  ${${TARGET}_LIBS}
+  ${CURSES_NCURSES_LIBRARY}
 )
 
 #compress manpage
 set(MANPAGE_GZ ${CMAKE_BINARY_DIR}/mattext.1.gz)
-add_custom_command(OUTPUT ${MANPAGE_GZ} 
+add_custom_command(OUTPUT ${MANPAGE_GZ}
   COMMAND gzip -c ${CMAKE_SOURCE_DIR}/mattext.1 > ${MANPAGE_GZ})
 
 add_custom_target(MANPAGE ALL DEPENDS ${MANPAGE_GZ})
@@ -48,8 +52,9 @@ install(FILES ${MANPAGE_GZ} DESTINATION share/man/man1)
 #check if we need to include some dir to get curses with wchar_t support
 include(CheckCXXSymbolExists)
 set(CMAKE_REQUIRED_DEFINITIONS -D_XOPEN_SOURCE_EXTENDED)
-set(CMAKE_REQUIRED_LIBRARIES ${${TARGET}_LIBS})
-CHECK_CXX_SYMBOL_EXISTS(setcchar "${CURSES_INCLUDE_PATH}/curses.h" 
+set(CMAKE_REQUIRED_INCLUDES ${CURSES_INCLUDE_PATH})
+set(CMAKE_REQUIRED_LIBRARIES ${CURSES_NCURSES_LIBRARY})
+CHECK_CXX_SYMBOL_EXISTS(setcchar "${CURSES_INCLUDE_PATH}/curses.h"
   CURSES_HAS_WCHAR)
 
 if(NOT CURSES_HAS_WCHAR)
@@ -57,7 +62,7 @@ if(NOT CURSES_HAS_WCHAR)
   foreach(CURSES_SUBDIR ${CURSES_SUBDIRS})
     if(IS_DIRECTORY ${CURSES_SUBDIR})
       unset(CURSES_HAS_WCHAR CACHE)
-      CHECK_CXX_SYMBOL_EXISTS(setcchar "${CURSES_SUBDIR}/curses.h" 
+      CHECK_CXX_SYMBOL_EXISTS(setcchar "${CURSES_SUBDIR}/curses.h"
         CURSES_HAS_WCHAR)
       if(${CURSES_HAS_WCHAR})
         include_directories(${CURSES_SUBDIR})
@@ -66,6 +71,8 @@ if(NOT CURSES_HAS_WCHAR)
     endif()
   endforeach()
 endif()
+
+include_directories(${CURSES_INCLUDE_PATH})
 
 if(NOT CURSES_HAS_WCHAR)
   message(FATAL_ERROR "Ncurses does not support wide characters!")
