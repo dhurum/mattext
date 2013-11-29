@@ -5,17 +5,35 @@ project(${TARGET})
 
 #fix curses include and lib paths for OSX
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set(CURSES_NCURSES_LIBRARY "/usr/lib/libncursesw.so" CACHE FILEPATH "Ncurses library")
-  set(CURSES_INCLUDE_PATH "/usr/include" CACHE PATH "Ncurses include dir")
+  message(WARNING "Looks like you are using OSX. "
+    "Please, make sure that you have argp-standalone installed from Homebrew.")
+  
+  include_directories(/opt/homebrew/include)
+  link_directories(/opt/homebrew/lib)
+  set(TARGET_LIBS argp)
 endif()
 
 find_package(Curses)
 
 if(CURSES_NCURSES_LIBRARY MATCHES NOTFOUND)
-  message(FATAL_ERROR "Ncurses library not found!")
+  if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    message(WARNING "Trying to fix OSX curses paths")
+    unset(CURSES_NCURSES_LIBRARY CACHE)
+    unset(CURSES_LIBRARY CACHE)
+    unset(CURSES_INCLUDE_PATH CACHE)
+    set(CURSES_NCURSES_LIBRARY "/usr/lib/libncursesw.so")
+    set(CURSES_LIBRARY ${CURSES_NCURSES_LIBRARY})
+    set(CURSES_INCLUDE_PATH "/usr/include")
+  else()
+    message(FATAL_ERROR "Ncurses library not found!")
+  endif()
 endif()
 
+#use widechar ncurses library
 string(REPLACE "s." "sw." CURSES_NCURSES_LIBRARY "${CURSES_NCURSES_LIBRARY}")
+
+set(TARGET_LIBS ${TARGET_LIBS} ${CURSES_NCURSES_LIBRARY})
+include_directories(${CURSES_INCLUDE_PATH})
 
 set(CMAKE_CXX_FLAGS
   -Werror
@@ -26,6 +44,10 @@ set(CMAKE_CXX_FLAGS
   -Wclobbered
   -Wempty-body
 )
+#make clang just ignore unknown options
+if(CMAKE_CXX_COMPILER MATCHES "clang")
+  set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -Wno-unknown-warning-option)
+endif()
 #transform list to string
 string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
@@ -36,7 +58,7 @@ set(${TARGET}_SRCS
 add_executable(${TARGET} ${${TARGET}_SRCS})
 
 target_link_libraries(${TARGET}
-  ${CURSES_NCURSES_LIBRARY}
+  ${TARGET_LIBS}
 )
 
 #compress manpage
@@ -53,7 +75,7 @@ install(FILES ${MANPAGE_GZ} DESTINATION share/man/man1)
 include(CheckCXXSymbolExists)
 set(CMAKE_REQUIRED_DEFINITIONS -D_XOPEN_SOURCE_EXTENDED)
 set(CMAKE_REQUIRED_INCLUDES ${CURSES_INCLUDE_PATH})
-set(CMAKE_REQUIRED_LIBRARIES ${CURSES_NCURSES_LIBRARY})
+set(CMAKE_REQUIRED_LIBRARIES ${TARGET_LIBS})
 CHECK_CXX_SYMBOL_EXISTS(setcchar "${CURSES_INCLUDE_PATH}/curses.h"
   CURSES_HAS_WCHAR)
 
@@ -65,14 +87,12 @@ if(NOT CURSES_HAS_WCHAR)
       CHECK_CXX_SYMBOL_EXISTS(setcchar "${CURSES_SUBDIR}/curses.h"
         CURSES_HAS_WCHAR)
       if(${CURSES_HAS_WCHAR})
-        include_directories(${CURSES_SUBDIR})
+        include_directories(BEFORE ${CURSES_SUBDIR})
         break()
       endif()
     endif()
   endforeach()
 endif()
-
-include_directories(${CURSES_INCLUDE_PATH})
 
 if(NOT CURSES_HAS_WCHAR)
   message(FATAL_ERROR "Ncurses does not support wide characters!")
