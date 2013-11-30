@@ -1,6 +1,6 @@
 ##Simple matrix-style pager
 
-Mattext shows text with matrix-style rain-of-symbols animation during page changes.  
+Mattext shows text with matrix-style rain-of-symbols animation during page changes ([screenshots](http://dhurum.github.io/mattext/)).  
 Usage: `mattext [options] file1 [file2 ...]` or `cat file | mattext [options]`.
 
 ###Options:
