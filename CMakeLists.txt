@@ -3,34 +3,27 @@ cmake_minimum_required(VERSION 2.8)
 set(TARGET mattext)
 project(${TARGET})
 
-#fix curses include and lib paths for OSX
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  message(WARNING "Looks like you are using OSX. "
-    "Please, make sure that you have argp-standalone installed from Homebrew.")
-  
-  include_directories(/opt/homebrew/include)
-  link_directories(/opt/homebrew/lib)
-  set(TARGET_LIBS argp)
-endif()
-
 find_package(Curses)
 
 if(CURSES_NCURSES_LIBRARY MATCHES NOTFOUND)
-  if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    message(WARNING "Trying to fix OSX curses paths")
-    unset(CURSES_NCURSES_LIBRARY CACHE)
-    unset(CURSES_LIBRARY CACHE)
-    unset(CURSES_INCLUDE_PATH CACHE)
-    set(CURSES_NCURSES_LIBRARY "/usr/lib/libncursesw.so")
-    set(CURSES_LIBRARY ${CURSES_NCURSES_LIBRARY})
-    set(CURSES_INCLUDE_PATH "/usr/include")
-  else()
-    message(FATAL_ERROR "Ncurses library not found!")
-  endif()
+  message(FATAL_ERROR "Ncurses library not found!")
 endif()
 
-#use widechar ncurses library
-string(REPLACE "s." "sw." CURSES_NCURSES_LIBRARY "${CURSES_NCURSES_LIBRARY}")
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  #add homebrew paths and argp library for OSX
+  if(NOT HOMEBREW_PATH)
+    set(HOMEBREW_PATH /usr/local)
+  endif()
+
+  include_directories(${HOMEBREW_PATH}/include)
+  link_directories(${HOMEBREW_PATH}/lib)
+
+  set(TARGET_LIBS argp)
+else()
+  #in Linux use widechar ncurses library
+  string(REPLACE "s." "sw." CURSES_NCURSES_LIBRARY "${CURSES_NCURSES_LIBRARY}")
+endif()
+
 
 set(TARGET_LIBS ${TARGET_LIBS} ${CURSES_NCURSES_LIBRARY})
 include_directories(${CURSES_INCLUDE_PATH})
@@ -41,12 +34,11 @@ set(CMAKE_CXX_FLAGS
   -Wuninitialized
   -Winit-self
   -Wtype-limits
-  -Wclobbered
   -Wempty-body
 )
-#make clang just ignore unknown options
-if(CMAKE_CXX_COMPILER MATCHES "clang")
-  set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -Wno-unknown-warning-option)
+#add additional warning option for gcc
+if(CMAKE_COMPILER_IS_GNUCXX)
+  set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -Wclobbered)
 endif()
 #transform list to string
 string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
