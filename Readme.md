@@ -19,6 +19,14 @@ Usage: `mattext [options] file1 [file2 ...]` or `cat file | mattext [options]`.
 * `q` or `Q` or `ctrl + D` - Exit program;
 * any other key - Show next page;
 
+###Building:
+If you use Archlinux, you can take [package](https://aur.archlinux.org/packages/mattext/) from aur, or PKGBUILD from [archlinux](https://github.com/dhurum/mattext/tree/archlinux) branch.  
+If you use OSX, you can take homebrew formula from [osx](https://github.com/dhurum/mattext/tree/osx) branch.
+
+To build mattext from sources open terminal, go to mattext dir, and run `mkdir build; cd build; cmake ../ && make`.  
+This will build mattext binary. To test it, you can run `./mattext -c ../mattext.cpp`.
+If you would like to install mattext, you can run `make install`.
+
 ###Troubleshooting:
 If you see white squares instead of some symbols, there can be 3 options:
 
