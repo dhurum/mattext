@@ -19,6 +19,11 @@ Usage: `mattext [options] file1 [file2 ...]` or `cat file | mattext [options]`.
 * `q` or `Q` or `ctrl + D` - Exit program;
 * any other key - Show next page;
 
+###Quick install guide:
+1. sh -c "$(curl -fsSL https://raw.github.com/dhurum/mattext/osx/install_formula.sh)"
+2. brew install mattext
+3. profit!
+
 ###Troubleshooting:
 If you see white squares instead of some symbols, there can be 3 options:
 
