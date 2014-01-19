@@ -44,6 +44,9 @@ endif()
 string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 set(${TARGET}_SRCS
+  cmdline.cpp
+  input.cpp
+  screen.cpp
   mattext.cpp
 )
 
