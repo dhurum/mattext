@@ -44,10 +44,10 @@ endif()
 string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 set(${TARGET}_SRCS
-  cmdline.cpp
-  input.cpp
-  screen.cpp
-  mattext.cpp
+  src/cmdline.cpp
+  src/input.cpp
+  src/screen.cpp
+  src/mattext.cpp
 )
 
 add_executable(${TARGET} ${${TARGET}_SRCS})
