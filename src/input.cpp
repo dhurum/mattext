@@ -44,7 +44,7 @@ Input::~Input()
 
 InputAction Input::get(bool block)
 {
-  int usr_cmd;
+  int usr_cmd = 0;
 
   if(!block)
   {

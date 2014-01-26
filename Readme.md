@@ -4,11 +4,13 @@ Mattext shows text with matrix-style rain-of-symbols animation during page chang
 Usage: `mattext [options] file1 [file2 ...]` or `cat file | mattext [options]`.
 
 ###Options:
-* `-d`, `--delay` - Delay between screen redraws, in milliseconds, default 80;
-* `-l`, `--rand-len` - Maximum length of random symbols columns;
+* `-d`, `--delay <delay>` - Delay between screen redraws, in milliseconds, default 80;
+* `-l`, `--rand-len <length>` - Maximum length of random symbols columns;
 * `-o`, `--onepage` - Show only one page, then exit;
 * `-n`, `--non-interact` - Do not wait for user input before showing next page;
 * `-i`, `--infinite` - At the end of file start reading it from the beginning;
+* `-b`, `--block-lines <lines>` - Block until at least specified number of lines is read, default 1;
+* `-B`, `--block-page` - Block until full page is read;
 * `-c`, `--colorize` - Colorize output;
 * `-C`, `--centrate-horiz` - Centrate text horizontally;
 * `-L`, `--centrate-horiz-longest` - Centrate text horizontally by longest string;

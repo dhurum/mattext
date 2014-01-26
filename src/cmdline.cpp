@@ -32,20 +32,23 @@ OF SUCH DAMAGE.
 #include "cmdline.h"
 
 #define DEFAULT_DELAY 80
-#define __MAKE_STR(a) #a
-#define _MAKE_STR(a) __MAKE_STR(a)
-#define DEFAULT_DELAY_STR _MAKE_STR(DEFAULT_DELAY)
+#define DEFAULT_BLOCK_LINES 1
+#define _MAKE_STR(a) #a
+#define MAKE_STR(a) _MAKE_STR(a)
 
 static argp_option options[] = {
   {"delay", 'd', "value",  0, "Delay between redraws in milliseconds, default "
-    DEFAULT_DELAY_STR, 1},
+    MAKE_STR(DEFAULT_DELAY), 1},
   {"rand-len", 'l', "value",  0, "Max length of random symbols columns", 1},
   {"onepage", 'o', NULL,  0, "Show only one page", 2},
   {"non-interact", 'n', NULL,  0, "Run in non-interactive mode", 2},
   {"infinite", 'i', NULL,  0,
     "At the end of file start reading it from the beginning", 2},
-  {"block", 'b', NULL,  0,
-    "Block until any data can be read", 2},
+  {"block-lines", 'b', "value",  0,
+    "Block until at least specified number of lines is read, default "
+      MAKE_STR(DEFAULT_BLOCK_LINES), 2},
+  {"block-page", 'B', NULL,  0,
+    "Block until full page is read", 2},
   {"colorize", 'c', NULL,  0, "Colorize output", 3},
   {"centrate-horiz", 'C', NULL,  0, "Centrate text horizontally", 3},
   {"centrate-horiz-longest", 'L', NULL,  0,
@@ -55,6 +58,19 @@ static argp_option options[] = {
   {0}
 };
 
+static bool getValue(int &value, char *str)
+{
+  char *end = NULL;
+  int res = strtol(str, &end, 0);
+
+  if(str == end)
+  {
+    return false;
+  }
+  value = res;
+  return true;
+}
+
 static error_t parseOptions(int key, char *arg, struct argp_state *state)
 {
   CmdLineArgs *args = (CmdLineArgs*)state->input;
@@ -62,10 +78,16 @@ static error_t parseOptions(int key, char *arg, struct argp_state *state)
   switch (key)
   {
     case 'd':
-      args->delay = atoi(arg);
+      if(!getValue(args->delay, arg))
+      {
+        return ARGP_ERR_UNKNOWN;
+      }
       break;
     case 'l':
-      args->rand_columns_len = atoi(arg);
+      if(!getValue(args->rand_columns_len, arg))
+      {
+        return ARGP_ERR_UNKNOWN;
+      }
       break;
     case 'o':
       args->onepage = true;
@@ -93,7 +115,13 @@ static error_t parseOptions(int key, char *arg, struct argp_state *state)
       args->without_japanese = true;
       break;
     case 'b':
-      args->block = true;
+      if(!getValue(args->block_lines, arg))
+      {
+        return ARGP_ERR_UNKNOWN;
+      }
+      break;
+    case 'B':
+      args->block_lines = -1;
       break;
     case 0:
       args->addFile(arg);
@@ -108,6 +136,7 @@ CmdLineArgs::CmdLineArgs(int argc, char *argv[])
 {
   delay = DEFAULT_DELAY;
   rand_columns_len = 0;
+  block_lines = DEFAULT_BLOCK_LINES;
   onepage = false;
   noninteract = false;
   colorize = false;
@@ -116,7 +145,6 @@ CmdLineArgs::CmdLineArgs(int argc, char *argv[])
   centrate_vert = false;
   without_japanese = false;
   infinite = false;
-  block = false;
 
   stdin_returned = false;
   real_files = false;

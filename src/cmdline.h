@@ -36,7 +36,8 @@ using std::list;
 struct CmdLineArgs
 {
   int delay,
-      rand_columns_len;
+      rand_columns_len,
+      block_lines; /*0 - don't block, <0 - block page, >0 - block lines*/
   bool onepage,
        noninteract,
        colorize,
@@ -44,8 +45,7 @@ struct CmdLineArgs
        centrate_horiz_longest,
        centrate_vert,
        without_japanese,
-       infinite,
-       block;
+       infinite;
 
   CmdLineArgs(int argc, char *argv[]);
   ~CmdLineArgs();

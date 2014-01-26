@@ -11,6 +11,9 @@ mattext \- Simple matrix\-style pager.
 .RB [\| \-o \|]
 .RB [\| \-n \|]
 .RB [\| \-i \|]
+.RB [\| \-b
+.IR lines \|]
+.RB [\| \-B \|]
 .RB [\| \-c \|]
 .RB [\| \-C \|]
 .RB [\| \-V \|]
@@ -45,6 +48,12 @@ Do not wait for user input before showing next page.
 .TP
 .B \-i\fR,\ \fB\-\-infinite
 At the end of file start reading it from the beginning.
+.TP
+.B \-b\ \fIlines\fR,\ \fB\-\-block\-lines\ \fIlines
+Block until at least specified number of lines is read, default 1.
+.TP
+.B \-B\fR,\ \fB\-\-block\-page
+Block until full page is read.
 .TP
 .B \-c\fR,\ \fB\-\-colorize
 Colorize output.

@@ -32,11 +32,60 @@ OF SUCH DAMAGE.
 #include <errno.h>
 #include <time.h>
 #include <wchar.h>
+#include <sys/select.h>
 #include "cmdline.h"
 #include "input.h"
 #include "screen.h"
 
 #define STR_LEN 1024
+
+static InputAction getLines(FILE *file, wchar_t *text, size_t line_max_len,
+    size_t *lines_len, size_t &longest_line, size_t min_lines_num,
+    size_t max_lines_num, size_t &lines_num, Input *input)
+{
+  fd_set fds;
+  timeval select_tm;
+  InputAction cmd = WouldBlock;
+
+  lines_num = 0;
+
+  while(true)
+  {
+    errno = 0;
+    for(; (lines_num < max_lines_num) && fgetws(text, line_max_len + 1, file);
+        ++lines_num)
+    {
+      lines_len[lines_num] = wcslen(text);
+      if(text[lines_len[lines_num] - 1] == '\n')
+      {
+        --lines_len[lines_num];
+        text[lines_len[lines_num]] = '\0';
+      }
+      text += line_max_len;
+
+      if(lines_len[lines_num] > longest_line)
+      {
+        longest_line = lines_len[lines_num];
+      }
+    }
+    cmd = input->get();
+    
+    if((lines_num < min_lines_num) && (errno == EWOULDBLOCK) && (cmd != Quit))
+    {
+      select_tm.tv_sec = 0;
+      select_tm.tv_usec = 100;
+      FD_ZERO(&fds);
+      FD_SET(fileno(file), &fds);
+
+      select(fileno(file) + 1, &fds, NULL, NULL, &select_tm);
+    }
+    else
+    {
+      break;
+    }
+  }
+  return cmd;
+}
 
 int main(int argc, char *argv[])
 {
@@ -44,11 +93,12 @@ int main(int argc, char *argv[])
   Screen *screen = NULL;
   Input *input = NULL;
   wchar_t *text = NULL;
-  size_t *strings_lens;
-  size_t longest_str;
-  size_t read_strings = 0;
+  size_t *lines_len = NULL;
+  size_t longest_line = 0;
+  size_t read_lines = 0;
   CmdLineArgs args(argc, argv);
   FILE *file = NULL;
+  size_t min_lines_num = 0;
 
   file = args.getNextFile();
 
@@ -60,8 +110,16 @@ int main(int argc, char *argv[])
     screen = new Screen(&args, input);
     //We need rows * cols characters + one trailing '\0';
     text = new wchar_t[screen->rows * screen->cols + 1];
-    strings_lens = new size_t[screen->rows];
-    screen->setTextInfo(text, strings_lens, & longest_str, &read_strings);
+    lines_len = new size_t[screen->rows];
+    screen->setTextInfo(text, lines_len, & longest_line, &read_lines);
+    if(args.block_lines < 0)
+    {
+      min_lines_num = screen->rows;
+    }
+    else
+    {
+      min_lines_num = args.block_lines;
+    }
   }
   else
   {
@@ -79,39 +137,25 @@ int main(int argc, char *argv[])
       fputws(text, stdout);
       continue;
     }
-    wchar_t *text_tmp = text;
-    memset(strings_lens, 0, sizeof(size_t) * screen->rows);
-    longest_str = 0;
+    memset(lines_len, 0, sizeof(size_t) * screen->rows);
+    longest_line = 0;
 
-    for(read_strings = 0;
-        (read_strings < screen->rows) && fgetws(text_tmp, screen->cols + 1, file);
-        ++read_strings)
+    if(getLines(file, text, screen->cols, lines_len, longest_line,
+          min_lines_num, screen->rows, read_lines, input) == Quit)
     {
-      strings_lens[read_strings] = wcslen(text_tmp);
-      if(text_tmp[strings_lens[read_strings] - 1] == '\n')
-      {
-        --strings_lens[read_strings];
-        text_tmp[strings_lens[read_strings]] = '\0';
-      }
-      text_tmp += screen->cols;
-      if(strings_lens[read_strings] > longest_str)
-      {
-        longest_str = strings_lens[read_strings];
-      }
+      break;
     }
-    if(!read_strings)
+
+    if(!read_lines)
     {
-      if(errno != EWOULDBLOCK)
+      file = args.getNextFile();
+      if(!file)
       {
-        file = args.getNextFile();
-        if(!file)
-        {
-          break;
-        }
-        if(file != stdin)
-        {
-          continue;
-        }
+        break;
+      }
+      if(file != stdin)
+      {
+        continue;
       }
     }
     InputAction cmd = screen->playAnimation();
@@ -133,7 +177,7 @@ int main(int argc, char *argv[])
   delete[] text;
   if(is_tty)
   {
-    delete[] strings_lens;
+    delete[] lines_len;
     delete input;
     delete screen;
   }
