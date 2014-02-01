@@ -38,9 +38,8 @@ class Screen
            cols;
     Screen(CmdLineArgs *args, Input *input);
     ~Screen();
+    InputAction readLines(FILE *file, size_t min_lines_num, bool &file_end);
     InputAction playAnimation();
-    void setTextInfo(wchar_t *text, size_t *strings_lens, size_t *longest_str,
-            size_t *read_strings);
 
   private:
     int *col_lengths,
@@ -50,9 +49,9 @@ class Screen
         delay;
     wchar_t *first_chars,
             *text;
-    size_t *strings_lens,
-           *longest_str,
-           *read_strings;
+    size_t *lines_len,
+           longest_line,
+           read_lines;
     bool colorize,
          centrate_horiz,
          centrate_horiz_longest,

@@ -28,12 +28,18 @@ OF SUCH DAMAGE.
 #define _XOPEN_SOURCE_EXTENDED
 #include <curses.h>
 #include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#include <locale.h>
 #include <unistd.h>
+#include <sys/select.h>
 #include "screen.h"
 
 Screen::Screen(CmdLineArgs *args, Input *input) : input(input)
 {
   delay = args->delay;
+  
+  setlocale(LC_CTYPE, "");
 
   initscr();
   noecho();
@@ -56,6 +62,11 @@ Screen::Screen(CmdLineArgs *args, Input *input) : input(input)
   col_lengths = new int[cols];
   col_offsets = new int[cols];
   first_chars = new wchar_t[cols];
+  //We need rows * cols characters + one trailing '\0';
+  text = new wchar_t[rows * cols + 1];
+  lines_len = new size_t[rows];
+  longest_line = 0;
+  read_lines = 0;
 
   if(!col_lengths || ! col_offsets || !first_chars)
   {
@@ -82,11 +93,69 @@ Screen::Screen(CmdLineArgs *args, Input *input) : input(input)
 
 Screen::~Screen()
 {
+  delete[] text;
+  delete[] lines_len;
   delete[] col_lengths;
   delete[] col_offsets;
   delete[] first_chars;
 
   endwin();
+}
+
+InputAction Screen::readLines(FILE *file, size_t min_lines_num, bool &file_end)
+{
+  fd_set fds;
+  timeval select_tm;
+  InputAction cmd = WouldBlock;
+  wchar_t *text_tmp = text;
+
+  file_end = false;
+  read_lines = 0;
+  memset(lines_len, 0, sizeof(size_t) * rows);
+  longest_line = 0;
+
+  while(true)
+  {
+    errno = 0;
+    for(; (read_lines < rows) && fgetws(text_tmp, cols + 1, file);
+        ++read_lines)
+    {
+      lines_len[read_lines] = wcslen(text_tmp);
+      if(text_tmp[lines_len[read_lines] - 1] == '\n')
+      {
+        --lines_len[read_lines];
+        text_tmp[lines_len[read_lines]] = '\0';
+      }
+      text_tmp += cols;
+
+      if(lines_len[read_lines] > longest_line)
+      {
+        longest_line = lines_len[read_lines];
+      }
+    }
+
+    if((read_lines != rows) && (errno != EWOULDBLOCK))
+    {
+        file_end = true;
+    }
+
+    cmd = input->get();
+    
+    if((read_lines < min_lines_num) && !file_end && (cmd != Quit))
+    {
+      select_tm.tv_sec = 0;
+      select_tm.tv_usec = 100;
+      FD_ZERO(&fds);
+      FD_SET(fileno(file), &fds);
+
+      select(fileno(file) + 1, &fds, NULL, NULL, &select_tm);
+    }
+    else
+    {
+      break;
+    }
+  }
+  return cmd;
 }
 
 wchar_t Screen::getRandomSymbol()
@@ -119,16 +188,16 @@ void Screen::updateSymbol(int col, int row, wchar_t symbol, bool bold = false)
 
 wchar_t Screen::getTextSymbol(int row, int col)
 {
-  int start_row = centrate_vert ? ((rows - *read_strings) / 2) : 0;
+  int start_row = centrate_vert ? ((rows - read_lines) / 2) : 0;
   row -= start_row;
 
-  size_t str_len = centrate_horiz_longest ? *longest_str : strings_lens[row];
+  size_t str_len = centrate_horiz_longest ? longest_line : lines_len[row];
   int start_col = centrate_horiz ? ((cols - str_len) / 2) : 0;
   col -= start_col;
 
 
-  if((row < 0) || (row >= (int)*read_strings)
-      || (col < 0) || (col >= (int)strings_lens[row]))
+  if((row < 0) || (row >= (int)read_lines)
+      || (col < 0) || (col >= (int)lines_len[row]))
   {
     return ' ';
   }
@@ -218,13 +287,4 @@ InputAction Screen::playAnimation()
     usleep(delay * 1000);
   }
   return cmd;
-}
-
-void Screen::setTextInfo(wchar_t *_text, size_t *_strings_lens,
-    size_t *_longest_str, size_t *_read_strings)
-{
-  text = _text;
-  strings_lens = _strings_lens;
-  longest_str = _longest_str;
-  read_strings = _read_strings;
 }
