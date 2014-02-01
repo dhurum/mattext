@@ -47,7 +47,7 @@ static InputAction getLines(FILE *file, wchar_t *text, size_t line_max_len,
   timeval select_tm;
   InputAction cmd = WouldBlock;
 
-  file_end = true;
+  file_end = false;
   lines_num = 0;
 
   while(true)
@@ -70,9 +70,9 @@ static InputAction getLines(FILE *file, wchar_t *text, size_t line_max_len,
       }
     }
 
-    if(errno == EWOULDBLOCK)
+    if((lines_num != max_lines_num) && (errno != EWOULDBLOCK))
     {
-        file_end = false;
+        file_end = true;
     }
 
     cmd = input->get();
@@ -94,69 +94,63 @@ static InputAction getLines(FILE *file, wchar_t *text, size_t line_max_len,
   return cmd;
 }
 
-int main(int argc, char *argv[])
+static void simpleOutput(CmdLineArgs *args)
 {
-  char is_tty = isatty(fileno(stdout));
-  Screen *screen = NULL;
-  Input *input = NULL;
+  wchar_t text[STR_LEN];
+  FILE *file = args->getNextFile();
+
+  while(true)
+  {
+    if(!fgetws(text, STR_LEN, file))
+    {
+      if(!(file = args->getNextFile()))
+      {
+        return;
+      }
+    }
+    fputws(text, stdout);
+  }
+}
+
+void animatedOutput(CmdLineArgs *args)
+{
+  Input input;
+  Screen screen(args, &input);
   wchar_t *text = NULL;
   size_t *lines_len = NULL;
   size_t longest_line = 0;
   size_t read_lines = 0;
-  CmdLineArgs args(argc, argv);
-  FILE *file = NULL;
   size_t min_lines_num = 0;
+  FILE *file = args->getNextFile();
 
-  file = args.getNextFile();
-
-  if(is_tty)
+  //We need rows * cols characters + one trailing '\0';
+  text = new wchar_t[screen.rows * screen.cols + 1];
+  lines_len = new size_t[screen.rows];
+  screen.setTextInfo(text, lines_len, & longest_line, &read_lines);
+  if(args->block_lines < 0)
   {
-    setlocale(LC_CTYPE, "");
-    srand(time(NULL));
-    input = new Input();
-    screen = new Screen(&args, input);
-    //We need rows * cols characters + one trailing '\0';
-    text = new wchar_t[screen->rows * screen->cols + 1];
-    lines_len = new size_t[screen->rows];
-    screen->setTextInfo(text, lines_len, & longest_line, &read_lines);
-    if(args.block_lines < 0)
-    {
-      min_lines_num = screen->rows;
-    }
-    else
-    {
-      min_lines_num = args.block_lines;
-    }
+    min_lines_num = screen.rows;
   }
   else
   {
-    text = new wchar_t[STR_LEN];
+    min_lines_num = args->block_lines;
   }
 
   while(true)
   {
-    if(!is_tty)
-    {
-      if(!fgetws(text, STR_LEN, file))
-      {
-        break;
-      }
-      fputws(text, stdout);
-      continue;
-    }
-    memset(lines_len, 0, sizeof(size_t) * screen->rows);
+    memset(lines_len, 0, sizeof(size_t) * screen.rows);
     longest_line = 0;
     bool file_end = true;
 
-    if(getLines(file, text, screen->cols, lines_len, longest_line,
-          min_lines_num, screen->rows, read_lines, file_end, input) == Quit)
+    if(getLines(file, text, screen.cols, lines_len, longest_line,
+          min_lines_num, screen.rows, read_lines, file_end, &input) == Quit)
     {
       break;
     }
 
     if(file_end)
     {
-      file = args.getNextFile();
+      file = args->getNextFile();
       if(!file)
       {
         break;
@@ -166,15 +160,15 @@ int main(int argc, char *argv[])
         continue;
       }
     }
-    InputAction cmd = screen->playAnimation();
+    InputAction cmd = screen.playAnimation();
 
-    if(args.onepage)
+    if(args->onepage)
     {
       break;
     }
-    if(!args.noninteract && (cmd == WouldBlock))
+    if(!args->noninteract && (cmd == WouldBlock))
     {
-      cmd = input->get(true);
+      cmd = input.get(true);
     }
     if(cmd == Quit)
     {
@@ -183,11 +177,23 @@ int main(int argc, char *argv[])
   }
 
   delete[] text;
-  if(is_tty)
+  delete[] lines_len;
+}
+
+int main(int argc, char *argv[])
+{
+  CmdLineArgs args(argc, argv);
+  
+  setlocale(LC_CTYPE, "");
+  srand(time(NULL));
+
+  if(isatty(fileno(stdout)))
   {
-    delete[] lines_len;
-    delete input;
-    delete screen;
+    animatedOutput(&args);
+  }
+  else
+  {
+    simpleOutput(&args);
   }
 
   return 0;
