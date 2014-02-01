@@ -41,12 +41,13 @@ OF SUCH DAMAGE.
 
 static InputAction getLines(FILE *file, wchar_t *text, size_t line_max_len,
     size_t *lines_len, size_t &longest_line, size_t min_lines_num,
-    size_t max_lines_num, size_t &lines_num, Input *input)
+    size_t max_lines_num, size_t &lines_num, bool &file_end, Input *input)
 {
   fd_set fds;
   timeval select_tm;
   InputAction cmd = WouldBlock;
 
+  file_end = true;
   lines_num = 0;
 
   while(true)
@@ -68,9 +69,15 @@ static InputAction getLines(FILE *file, wchar_t *text, size_t line_max_len,
         longest_line = lines_len[lines_num];
       }
     }
+
+    if(errno == EWOULDBLOCK)
+    {
+        file_end = false;
+    }
+
     cmd = input->get();
     
-    if((lines_num < min_lines_num) && (errno == EWOULDBLOCK) && (cmd != Quit))
+    if((lines_num < min_lines_num) && !file_end && (cmd != Quit))
     {
       select_tm.tv_sec = 0;
       select_tm.tv_usec = 100;
@@ -139,14 +146,15 @@ int main(int argc, char *argv[])
     }
     memset(lines_len, 0, sizeof(size_t) * screen->rows);
     longest_line = 0;
+    bool file_end = true;
 
     if(getLines(file, text, screen->cols, lines_len, longest_line,
-          min_lines_num, screen->rows, read_lines, input) == Quit)
+          min_lines_num, screen->rows, read_lines, file_end, input) == Quit)
     {
       break;
     }
 
-    if(!read_lines)
+    if(file_end)
     {
       file = args.getNextFile();
       if(!file)
