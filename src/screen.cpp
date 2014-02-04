@@ -134,7 +134,7 @@ InputAction Screen::readLines(FILE *file, size_t min_lines_num, bool &file_end)
       }
     }
 
-    if((read_lines != rows) && (errno != EWOULDBLOCK))
+    if((read_lines == 0) && (errno != EWOULDBLOCK))
     {
         file_end = true;
     }
