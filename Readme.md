@@ -11,7 +11,7 @@ Usage: `mattext [options] file1 [file2 ...]` or `cat file | mattext [options]`.
 * `-i`, `--infinite` - At the end of file start reading it from the beginning;
 * `-b`, `--block-lines <lines>` - Block until at least specified number of lines is read, default 1;
 * `-B`, `--block-page` - Block until full page is read;
-* `-c`, `--colorize` - Colorize output;
+* `-c`, `--colorize` - Colorize output (green text on black background);
 * `-C`, `--centrate-horiz` - Centrate text horizontally;
 * `-L`, `--centrate-horiz-longest` - Centrate text horizontally by longest string;
 * `-v`, `--centrate-vert` - Centrate text vertically;
@@ -28,6 +28,13 @@ If you use OSX, you can take homebrew formula from [osx](https://github.com/dhur
 To build mattext from sources open terminal, go to mattext dir, and run `mkdir build; cd build; cmake ../ && make`.  
 This will build mattext binary. To test it, you can run `./mattext -c ../mattext.cpp`.
 If you would like to install mattext, you can run `make install`.
+
+###Examples:
+* `mattext -c file` - Show file, colorizing console, one page at a time, and exit at the end;
+* `mattext -cni file` - Show file, colorizing console, until exit key is pressed. When end is reached mattext starts reading it from the beginning;
+* `tail -f file | mattext -n` - Show file, waiting for at least one new line added to it before redrawing screen;
+* `echo "" | mattext -ni -b 0` - Show animation until quit command key is pressed, similar to cmatrix;
+* `mattext -niLv dir/*` - Show all files from directory dir, centrating text horizontally by longest line and vertically, until exit key is pressed. When mattext reaches the end of the last file it starts reading the first file. This mode can be useful for showing off your ascii art collection;
 
 ###Troubleshooting:
 If you see white squares instead of some symbols, there can be 3 options:

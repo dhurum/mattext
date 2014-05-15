@@ -59,8 +59,10 @@ target_link_libraries(${TARGET}
 
 #compress manpage
 set(MANPAGE_GZ ${CMAKE_BINARY_DIR}/mattext.1.gz)
+set(MANPAGE_SRC ${CMAKE_SOURCE_DIR}/mattext.1)
 add_custom_command(OUTPUT ${MANPAGE_GZ}
-  COMMAND gzip -c ${CMAKE_SOURCE_DIR}/mattext.1 > ${MANPAGE_GZ})
+  COMMAND gzip -c ${MANPAGE_SRC} > ${MANPAGE_GZ}
+  DEPENDS ${MANPAGE_SRC})
 
 add_custom_target(MANPAGE ALL DEPENDS ${MANPAGE_GZ})
 

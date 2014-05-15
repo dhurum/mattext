@@ -70,5 +70,22 @@ Centrate text vertically.
 .B \-e\fR,\ \fB\-\-without\-japanese
 Do not use Japanese symbols.
 
+.SH EXAMPLES
+.TP
+.B mattext -c file
+Show file, colorizing console, one page at a time, and exit at the end.
+.TP
+.B mattext -cni file
+Show file, colorizing console, until exit key is pressed. When end is reached mattext starts reading it from the beginning.
+.TP
+.B tail -f file | mattext -n
+Show file, waiting for at least one new line added to it before redrawing screen.
+.TP
+.B echo | mattext -ni -b 0
+Show animation until quit command key is pressed, similar to cmatrix.
+.TP
+.B mattext -niLv dir/*
+Show all files from directory dir, centrating text horizontally by longest line and vertically, until exit key is pressed. When mattext reaches the end of the last file it starts reading the first file. This mode can be useful for showing off your ascii art collection.
+
 .SH AUTHOR
 Denis Tikhomirov (dvtikhomirov@gmail.com)
