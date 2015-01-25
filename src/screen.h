@@ -53,9 +53,9 @@ class Screen
            longest_line,
            read_lines;
     bool colorize,
-         centrate_horiz,
-         centrate_horiz_longest,
-         centrate_vert,
+         center_horiz,
+         center_horiz_longest,
+         center_vert,
          without_japanese;
     Input *input;
 

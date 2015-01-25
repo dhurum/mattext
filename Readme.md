@@ -12,9 +12,9 @@ Usage: `mattext [options] file1 [file2 ...]` or `cat file | mattext [options]`.
 * `-b`, `--block-lines <lines>` - Block until at least specified number of lines is read, default 1;
 * `-B`, `--block-page` - Block until full page is read;
 * `-c`, `--colorize` - Colorize output (green text on black background);
-* `-C`, `--centrate-horiz` - Centrate text horizontally;
-* `-L`, `--centrate-horiz-longest` - Centrate text horizontally by longest string;
-* `-v`, `--centrate-vert` - Centrate text vertically;
+* `-C`, `--center-horiz` - Center text horizontally;
+* `-L`, `--center-horiz-longest` - Center text horizontally by longest string;
+* `-v`, `--center-vert` - Center text vertically;
 * `-e`, `--without-japanese` - Do not use Japanese symbols;
 
 ###Commands:

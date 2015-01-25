@@ -48,9 +48,9 @@ Screen::Screen(CmdLineArgs *args, Input *input) : input(input)
   getmaxyx(stdscr, rows, cols);
 
   colorize = has_colors() ? args->colorize : false;
-  centrate_horiz = args->centrate_horiz;
-  centrate_horiz_longest = args->centrate_horiz_longest;
-  centrate_vert = args->centrate_vert;
+  center_horiz = args->center_horiz;
+  center_horiz_longest = args->center_horiz_longest;
+  center_vert = args->center_vert;
   without_japanese = args->without_japanese;
 
   if(colorize)
@@ -188,11 +188,11 @@ void Screen::updateSymbol(int col, int row, wchar_t symbol, bool bold = false)
 
 wchar_t Screen::getTextSymbol(int row, int col)
 {
-  int start_row = centrate_vert ? ((rows - read_lines) / 2) : 0;
+  int start_row = center_vert ? ((rows - read_lines) / 2) : 0;
   row -= start_row;
 
-  size_t str_len = centrate_horiz_longest ? longest_line : lines_len[row];
-  int start_col = centrate_horiz ? ((cols - str_len) / 2) : 0;
+  size_t str_len = center_horiz_longest ? longest_line : lines_len[row];
+  int start_col = center_horiz ? ((cols - str_len) / 2) : 0;
   col -= start_col;
 
 

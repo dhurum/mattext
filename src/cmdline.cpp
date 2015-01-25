@@ -50,10 +50,10 @@ static argp_option options[] = {
   {"block-page", 'B', NULL,  0,
     "Block until full page is read", 2},
   {"colorize", 'c', NULL,  0, "Colorize output", 3},
-  {"centrate-horiz", 'C', NULL,  0, "Centrate text horizontally", 3},
-  {"centrate-horiz-longest", 'L', NULL,  0,
-    "Centrate text horizontally by longest string", 3},
-  {"centrate-vert", 'v', NULL,  0, "Centrate text vertically", 3},
+  {"center-horiz", 'C', NULL,  0, "Center text horizontally", 3},
+  {"center-horiz-longest", 'L', NULL,  0,
+    "Center text horizontally by longest string", 3},
+  {"center-vert", 'v', NULL,  0, "Center text vertically", 3},
   {"without-japanese", 'e', NULL,  0, "Do not use Japanese symbols", 4},
   {0}
 };
@@ -102,14 +102,14 @@ static error_t parseOptions(int key, char *arg, struct argp_state *state)
       args->colorize = true;
       break;
     case 'C':
-      args->centrate_horiz = true;
+      args->center_horiz = true;
       break;
     case 'L':
-      args->centrate_horiz = true;
-      args->centrate_horiz_longest = true;
+      args->center_horiz = true;
+      args->center_horiz_longest = true;
       break;
     case 'v':
-      args->centrate_vert = true;
+      args->center_vert = true;
       break;
     case 'e':
       args->without_japanese = true;
@@ -140,9 +140,9 @@ CmdLineArgs::CmdLineArgs(int argc, char *argv[])
   onepage = false;
   noninteract = false;
   colorize = false;
-  centrate_horiz = false;
-  centrate_horiz_longest = false;
-  centrate_vert = false;
+  center_horiz = false;
+  center_horiz_longest = false;
+  center_vert = false;
   without_japanese = false;
   infinite = false;
 
