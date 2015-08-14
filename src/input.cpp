@@ -57,7 +57,10 @@ InputAction Input::get(bool block)
     }
   }
 
-  read(tty_fno, &usr_cmd, sizeof(int));
+  if(!read(tty_fno, &usr_cmd, sizeof(int)))
+  {
+    return Quit;
+  }
 
   if((usr_cmd == 'q') || (usr_cmd == 'Q') || (usr_cmd == '\4'))
   {
