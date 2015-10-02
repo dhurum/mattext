@@ -25,38 +25,26 @@ OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-#ifndef __CMDLINE_H__
-#define __CMDLINE_H__
+#pragma once
 
 #include <list>
-#include <stdio.h>
 
-using std::list;
+#define DEFAULT_DELAY 80
+#define DEFAULT_BLOCK_LINES 1
 
-struct CmdLineArgs
-{
-  int delay,
-      rand_columns_len,
-      block_lines; /*0 - don't block, <0 - block page, >0 - block lines*/
-  bool onepage,
-       noninteract,
-       colorize,
-       center_horiz,
-       center_horiz_longest,
-       center_vert,
-       without_japanese,
-       infinite;
+class Config {
+ public:
+  int delay = DEFAULT_DELAY;
+  int rand_columns_len = 0;
+  int block_lines = DEFAULT_BLOCK_LINES;
+  bool noninteract = false;
+  bool use_colors = false;
+  bool center_horiz = false;
+  bool center_horiz_longest = false;
+  bool center_vert = false;
+  bool without_japanese = false;
+  bool infinite = false;
+  std::list<const char *> files;
 
-  CmdLineArgs(int argc, char *argv[]);
-  ~CmdLineArgs();
-  void addFile(char *name);
-  FILE* getNextFile();
-
-  private:
-    list<FILE*> files;
-    list<FILE*>::iterator file_it;
-    bool stdin_returned,
-         real_files;
+  Config(int argc, char *argv[]);
 };
-
-#endif

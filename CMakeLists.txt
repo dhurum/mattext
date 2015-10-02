@@ -25,7 +25,11 @@ else()
 endif()
 
 
-set(TARGET_LIBS ${TARGET_LIBS} ${CURSES_NCURSES_LIBRARY})
+set(TARGET_LIBS
+  ${TARGET_LIBS} 
+  ${CURSES_NCURSES_LIBRARY}
+  ev
+)
 include_directories(${CURSES_INCLUDE_PATH})
 
 set(CMAKE_CXX_FLAGS
@@ -36,6 +40,7 @@ set(CMAKE_CXX_FLAGS
   -Wtype-limits
   -Wempty-body
   -O2
+  --std=c++14
 )
 #add additional warning option for gcc
 if(CMAKE_COMPILER_IS_GNUCXX)
@@ -45,9 +50,12 @@ endif()
 string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 set(${TARGET}_SRCS
-  src/cmdline.cpp
-  src/input.cpp
-  src/screen.cpp
+  src/config.cpp
+  src/text_stream.cpp
+  src/terminal.cpp
+  src/animation.cpp
+  src/manager_interactive.cpp
+  src/manager_plain.cpp
   src/mattext.cpp
 )
 
@@ -95,3 +103,5 @@ endif()
 if(NOT CURSES_HAS_WCHAR)
   message(FATAL_ERROR "Ncurses does not support wide characters!")
 endif()
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

@@ -25,100 +25,34 @@ OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-#include <stdlib.h>
-#include <unistd.h>
-#include <time.h>
-#include <wchar.h>
-#include "cmdline.h"
-#include "input.h"
-#include "screen.h"
+#include <ev++.h>
+#include <exception>
+#include <memory>
+#include "config.h"
+#include "text_stream.h"
+#include "terminal.h"
+#include "manager_interactive.h"
+#include "manager_plain.h"
 
-#define STR_LEN 1024
-
-static void simpleOutput(CmdLineArgs *args)
-{
-  wchar_t text[STR_LEN];
-  FILE *file = args->getNextFile();
-
-  while(true)
-  {
-    if(!fgetws(text, STR_LEN, file))
-    {
-      if(!(file = args->getNextFile()))
-      {
-        return;
-      }
-    }
-    fputws(text, stdout);
-  }
-}
-
-void animatedOutput(CmdLineArgs *args)
-{
-  Input input;
-  Screen screen(args, &input);
-  size_t min_lines_num = 0;
-  FILE *file = args->getNextFile();
-
-  if(args->block_lines < 0)
-  {
-    min_lines_num = screen.rows;
-  }
-  else
-  {
-    min_lines_num = args->block_lines;
-  }
-
-  while(true)
-  {
-    bool file_end = true;
-
-    if(screen.readLines(file, min_lines_num, file_end) == Quit)
-    {
-      break;
-    }
-
-    if(file_end)
-    {
-      file = args->getNextFile();
-      if(!file)
-      {
-        break;
-      }
-      if(file != stdin)
-      {
-        continue;
-      }
-    }
-    InputAction cmd = screen.playAnimation();
-
-    if(args->onepage)
-    {
-      break;
-    }
-    if(!args->noninteract && (cmd == WouldBlock))
-    {
-      cmd = input.get(true);
-    }
-    if(cmd == Quit)
-    {
-      break;
-    }
-  }
-}
-
-int main(int argc, char *argv[])
-{
-  CmdLineArgs args(argc, argv);
+int main(int argc, char *argv[]) {
   srand(time(NULL));
 
-  if(isatty(fileno(stdout)))
-  {
-    animatedOutput(&args);
-  }
-  else
-  {
-    simpleOutput(&args);
+  try {
+    Config config(argc, argv);
+    Terminal terminal(config);
+    TextStream text_stream(config, terminal);
+    std::unique_ptr<Manager> manager;
+    if (terminal.isTty()) {
+      manager =
+          std::make_unique<ManagerInteractive>(config, text_stream, terminal);
+    } else {
+      manager = std::make_unique<ManagerPlain>(config, text_stream, terminal);
+    }
+
+    ev_run(EV_DEFAULT, 0);
+  } catch (std::exception &e) {
+    fprintf(stderr, "%s\n", e.what());
+    return 1;
   }
 
   return 0;

@@ -6,7 +6,6 @@ Usage: `mattext [options] file1 [file2 ...]` or `cat file | mattext [options]`.
 ###Options:
 * `-d`, `--delay <delay>` - Delay between screen redraws, in milliseconds, default 80;
 * `-l`, `--rand-len <length>` - Maximum length of random symbols columns;
-* `-o`, `--onepage` - Show only one page, then exit;
 * `-n`, `--non-interact` - Do not wait for user input before showing next page;
 * `-i`, `--infinite` - At the end of file start reading it from the beginning;
 * `-b`, `--block-lines <lines>` - Block until at least specified number of lines is read, default 1;
