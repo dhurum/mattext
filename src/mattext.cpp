@@ -22,6 +22,7 @@ Mattext is distributed in the hope that it will be useful,
 #include <ev++.h>
 #include <exception>
 #include <memory>
+#include <locale.h>
 #include "config.h"
 #include "text_stream.h"
 #include "terminal.h"
@@ -30,6 +31,7 @@ Mattext is distributed in the hope that it will be useful,
 
 int main(int argc, char *argv[]) {
   srand(time(NULL));
+  setlocale(LC_CTYPE, "");
 
   try {
     Config config(argc, argv);

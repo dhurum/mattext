@@ -21,7 +21,6 @@ Mattext is distributed in the hope that it will be useful,
 
 #define _XOPEN_SOURCE_EXTENDED
 #include <curses.h>
-#include <locale.h>
 #include <vector>
 #include <unistd.h>
 #include <sstream>
@@ -34,8 +33,6 @@ Mattext is distributed in the hope that it will be useful,
 Terminal::Terminal(const Config &config)
     : colors{COLOR_BLACK, COLOR_RED,     COLOR_GREEN, COLOR_YELLOW,
              COLOR_BLUE,  COLOR_MAGENTA, COLOR_CYAN,  COLOR_WHITE} {
-  setlocale(LC_CTYPE, "");
-
   if (!isatty(fileno(stdout))) {
     struct winsize w_size;
     if (ioctl(0, TIOCGWINSZ, &w_size) == -1) {
