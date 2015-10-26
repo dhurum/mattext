@@ -24,7 +24,7 @@ Mattext is distributed in the hope that it will be useful,
 #include <memory>
 #include <locale.h>
 #include "config.h"
-#include "text_stream.h"
+#include "file_stream.h"
 #include "terminal.h"
 #include "manager_interactive.h"
 #include "manager_plain.h"
@@ -36,13 +36,13 @@ int main(int argc, char *argv[]) {
   try {
     Config config(argc, argv);
     Terminal terminal(config);
-    TextStream text_stream(config, terminal);
+    FileStream file_stream(config, terminal);
     std::unique_ptr<Manager> manager;
     if (terminal.isTty()) {
       manager =
-          std::make_unique<ManagerInteractive>(config, text_stream, terminal);
+          std::make_unique<ManagerInteractive>(config, file_stream, terminal);
     } else {
-      manager = std::make_unique<ManagerPlain>(config, text_stream, terminal);
+      manager = std::make_unique<ManagerPlain>(config, file_stream, terminal);
     }
 
     ev_run(EV_DEFAULT, 0);

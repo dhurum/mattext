@@ -27,10 +27,10 @@ Mattext is distributed in the hope that it will be useful,
 #include "manager_interactive.h"
 
 ManagerInteractive::ManagerInteractive(const Config &config,
-                                       TextStream &text_stream,
+                                       FileStream &file_stream,
                                        const Terminal &terminal)
     : config(config),
-      text_stream(text_stream),
+      file_stream(file_stream),
       terminal(terminal),
       animation(config, terminal) {
   tty_fno = open("/dev/tty", O_RDONLY);
@@ -88,14 +88,14 @@ void ManagerInteractive::getNextPage() {
     next_page_pending = true;
     return;
   }
-  text_stream.read([this](const Text &text) {
+  file_stream.read([this](const Text &text) {
     this->animation.play(text, [this]() { this->checkPending(); });
   }, nullptr, terminal.getWidth(), terminal.getHeight());
 }
 
 void ManagerInteractive::quit() {
   io_watcher.stop();
-  text_stream.stop();
+  file_stream.stop();
   animation.stop();
   io_watcher.loop.break_loop(ev::ALL);
 }

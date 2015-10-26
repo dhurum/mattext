@@ -26,16 +26,16 @@ Mattext is distributed in the hope that it will be useful,
 #include <string.h>
 #include "manager_plain.h"
 
-ManagerPlain::ManagerPlain(const Config &config, TextStream &text_stream,
+ManagerPlain::ManagerPlain(const Config &config, FileStream &file_stream,
                            const Terminal &terminal)
-    : config(config), text_stream(text_stream), terminal(terminal) {
+    : config(config), file_stream(file_stream), terminal(terminal) {
   read();
 }
 
 ManagerPlain::~ManagerPlain() {}
 
 void ManagerPlain::read() {
-  text_stream.read(
+  file_stream.read(
       [this](const Text &text) {
         while (true) {
           const wchar_t *line = text.getLine();

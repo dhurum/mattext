@@ -90,7 +90,8 @@ string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 set(${TARGET}_SRCS
   src/config.cpp
-  src/text_stream.cpp
+  src/file_stream.cpp
+  src/file_reader.cpp
   src/terminal.cpp
   src/animation.cpp
   src/manager_interactive.cpp

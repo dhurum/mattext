@@ -21,30 +21,34 @@ Mattext is distributed in the hope that it will be useful,
 
 #pragma once
 
-#include <ev++.h>
+#include <vector>
 #include "config.h"
-#include "file_stream.h"
 #include "terminal.h"
-#include "animation.h"
-#include "manager.h"
 
-class ManagerInteractive : public Manager {
+class Text {
  public:
-  ManagerInteractive(const Config &config, FileStream &file_stream,
-                     const Terminal &terminal);
-  ~ManagerInteractive() override;
-  void inputCb(ev::io &w, int revents);
-  void checkPending();
+  virtual wchar_t get(size_t column, size_t row) const = 0;
+  virtual const wchar_t *getLine() const = 0;
+};
+
+class FileReader : public Text {
+ public:
+  enum class Status { Finished, WouldBlock, Error };
+  FileReader(const Config &config, const Terminal &terminal);
+  void reset(size_t line_len, size_t lines_num);
+  FileReader::Status read(FILE *f);
+  size_t linesRead() const;
+  wchar_t get(size_t column, size_t row) const override;
+  const wchar_t *getLine() const override;
 
  private:
-  ev::io io_watcher;
-  int tty_fno;
   const Config &config;
-  FileStream &file_stream;
   const Terminal &terminal;
-  Animation animation;
-  bool next_page_pending = false;
-
-  void getNextPage();
-  void quit();
+  std::vector<std::vector<wchar_t>> lines;
+  std::vector<size_t> line_lens;
+  size_t current_line_id;
+  size_t line_max_len;
+  size_t longest_line_len;
+  mutable size_t current_out_line_id;
+  bool prev_line_finished;
 };

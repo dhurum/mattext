@@ -22,13 +22,13 @@ Mattext is distributed in the hope that it will be useful,
 #pragma once
 
 #include "config.h"
-#include "text_stream.h"
+#include "file_stream.h"
 #include "terminal.h"
 #include "manager.h"
 
 class ManagerPlain : public Manager {
  public:
-  ManagerPlain(const Config &config, TextStream &text_stream,
+  ManagerPlain(const Config &config, FileStream &file_stream,
                const Terminal &terminal);
   ~ManagerPlain() override;
   void read();
@@ -36,6 +36,6 @@ class ManagerPlain : public Manager {
 
  private:
   const Config &config;
-  TextStream &text_stream;
+  FileStream &file_stream;
   const Terminal &terminal;
 };
