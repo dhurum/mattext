@@ -118,18 +118,14 @@ void FileStream::stop() {
 }
 
 void FileStream::read(std::function<void(const Text &text)> _on_read,
-                      std::function<void()> _on_end, size_t line_len,
-                      size_t lines_num) {
-  if (!line_len || !lines_num) {
-    return;
-  }
+                      std::function<void()> _on_end) {
   if ((current_file == files.end()) && !tryRewind()) {
     return;
   }
 
   on_read = _on_read;
   on_end = _on_end;
-  file_reader.reset(line_len, lines_num);
+  file_reader.reset();
 
   io_watcher.set<FileStream, &FileStream::readCb>(this);
   io_watcher.start(fileno((*current_file).first), ev::READ);

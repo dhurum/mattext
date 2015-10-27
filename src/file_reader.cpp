@@ -25,11 +25,13 @@ Mattext is distributed in the hope that it will be useful,
 
 FileReader::FileReader(const Config &config, const Terminal &terminal)
     : config(config), terminal(terminal) {
-  reset(1024, 1);
+  reset();
 }
 
-void FileReader::reset(size_t line_len, size_t lines_num) {
+void FileReader::reset() {
   bool resized = false;
+  size_t line_len = terminal.getWidth();
+  size_t lines_num = terminal.getHeight();
 
   if (lines.size() != lines_num) {
     lines.resize(lines_num);

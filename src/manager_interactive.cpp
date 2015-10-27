@@ -90,7 +90,7 @@ void ManagerInteractive::getNextPage() {
   }
   file_stream.read([this](const Text &text) {
     this->animation.play(text, [this]() { this->checkPending(); });
-  }, nullptr, terminal.getWidth(), terminal.getHeight());
+  }, nullptr);
 }
 
 void ManagerInteractive::quit() {

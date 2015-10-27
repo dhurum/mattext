@@ -36,7 +36,7 @@ class FileReader : public Text {
   enum class Status { Finished, WouldBlock, Error };
 
   FileReader(const Config &config, const Terminal &terminal);
-  void reset(size_t line_len, size_t lines_num);
+  void reset();
   FileReader::Status read(FILE *f);
   size_t linesRead() const;
   wchar_t get(size_t column, size_t row) const override;

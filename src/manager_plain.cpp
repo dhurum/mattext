@@ -50,7 +50,7 @@ void ManagerPlain::read() {
           }
         }
       },
-      [this]() { this->quit(); }, terminal.getWidth(), terminal.getHeight());
+      [this]() { this->quit(); });
 }
 
 void ManagerPlain::quit() {
