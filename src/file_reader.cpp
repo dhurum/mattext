@@ -21,6 +21,7 @@ Mattext is distributed in the hope that it will be useful,
 
 #include <wchar.h>
 #include <string.h>
+#include <stdexcept>
 #include "file_reader.h"
 
 FileReader::FileReader(const Config &config, const Terminal &terminal)
@@ -56,26 +57,21 @@ void FileReader::reset() {
   mbchar_id = 0;
 }
 
-FileReader::Status FileReader::read(FILE *f) {
+bool FileReader::read(FILE *f) {
   if (current_line_id == lines.size()) {
-    return FileReader::Status::Finished;
+    return true;
   }
 
   while (true) {
-    switch(readLine(f)) {
-      case FileReader::Status::WouldBlock:
-        return FileReader::Status::WouldBlock;
-      case FileReader::Status::Error:
-        return FileReader::Status::Error;
-      case FileReader::Status::Finished:
-        break;
+    if (!readLine(f)) {
+      return false;
     }
 
     auto &cur_line = lines[current_line_id];
     auto &line_len = line_lens[current_line_id];
 
     if (!line_len) {
-      return FileReader::Status::Finished;
+      return true;
     }
 
     if (cur_line[line_len - 1] == '\n') {
@@ -99,16 +95,16 @@ FileReader::Status FileReader::read(FILE *f) {
     ++current_line_id;
 
     if (current_line_id == lines.size()) {
-      return FileReader::Status::Finished;
+      return true;
     }
   }
 }
 
-FileReader::Status FileReader::readLine(FILE *f) {
+bool FileReader::readLine(FILE *f) {
   auto &cur_symbol_id = line_lens[current_line_id];
   mbstate_t mbs;
   if (cur_symbol_id == line_max_len) {
-    return FileReader::Status::Finished;
+    return true;
   }
 
   while (true) {
@@ -120,21 +116,21 @@ FileReader::Status FileReader::readLine(FILE *f) {
       mbchar_buf[mbchar_id] = fgetc(f);
       if (mbchar_buf[mbchar_id] == EOF) {
         if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
-          return FileReader::Status::WouldBlock;
+          return false;
         }
         else if (errno) {
-          return FileReader::Status::Error;
+          throw std::runtime_error(strerror(errno));
         }
 
         mbchar_id = 0;
-        return FileReader::Status::Finished;
+        return true;
       }
 
       memset(&mbs, 0, sizeof(mbs));
       size_t res = mbrtowc(&cur_symbol, mbchar_buf, mbchar_id + 1, &mbs);
 
       if (res == (size_t)-1) {
-        return FileReader::Status::Error;
+        throw std::runtime_error(strerror(errno));
       } else if (res == (size_t)-2) {
         continue;
       }
@@ -144,7 +140,7 @@ FileReader::Status FileReader::readLine(FILE *f) {
     ++cur_symbol_id;
     if ((cur_symbol == '\n') || (cur_symbol_id == line_max_len)) {
       lines[current_line_id][cur_symbol_id] = '\0';
-      return FileReader::Status::Finished;
+      return true;
     }
   }
 }

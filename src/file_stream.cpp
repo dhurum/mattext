@@ -82,34 +82,35 @@ bool FileStream::tryRewind() {
 }
 
 void FileStream::readCb(ev::io &w, int revents) {
-  //TODO: throw errors from read, here catch them and prepend with filename
-  switch (file_reader.read((*current_file).first)) {
-    case FileReader::Status::Finished:
-      io_watcher.stop();
-      if (file_reader.linesRead()) {
-        on_read(file_reader);
-      } else {
-        ++current_file;
-        if ((current_file != files.end()) || tryRewind()) {
-          io_watcher.start(fileno((*current_file).first), ev::READ);
-        }
+  bool ret;
+  try {
+    ret = file_reader.read((*current_file).first);
+  } catch (std::exception &e) {
+    io_watcher.stop();
+    std::ostringstream err;
+    err << "Can't read file '" << (*current_file).second
+      << "': " << e.what();
+    throw std::runtime_error(err.str());
+  }
+
+  if (ret) {
+    io_watcher.stop();
+    if (file_reader.linesRead()) {
+      on_read(file_reader);
+    } else {
+      ++current_file;
+      if ((current_file != files.end()) || tryRewind()) {
+        io_watcher.start(fileno((*current_file).first), ev::READ);
       }
-      break;
-    case FileReader::Status::WouldBlock: {
-      size_t block_lines =
-          (config.block_lines < 0) ? terminal.getHeight() : config.block_lines;
-      if (file_reader.linesRead() >= block_lines) {
-        io_watcher.stop();
-        on_read(file_reader);
-      }
-      break;
     }
-    case FileReader::Status::Error:
+  }
+  else {
+    size_t block_lines =
+      (config.block_lines < 0) ? terminal.getHeight() : config.block_lines;
+    if (file_reader.linesRead() >= block_lines) {
       io_watcher.stop();
-      std::ostringstream err;
-      err << "Can't read file '" << (*current_file).second
-          << "': " << strerror(errno);
-      throw std::runtime_error(err.str());
+      on_read(file_reader);
+    }
   }
 }
 

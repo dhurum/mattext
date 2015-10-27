@@ -33,11 +33,9 @@ class Text {
 
 class FileReader : public Text {
  public:
-  enum class Status { Finished, WouldBlock, Error };
-
   FileReader(const Config &config, const Terminal &terminal);
   void reset();
-  FileReader::Status read(FILE *f);
+  bool read(FILE *f);
   size_t linesRead() const;
   wchar_t get(size_t column, size_t row) const override;
   const wchar_t *getLine() const override;
@@ -55,5 +53,5 @@ class FileReader : public Text {
   char mbchar_buf[4];
   size_t mbchar_id;
 
-  FileReader::Status readLine(FILE *f);
+  bool readLine(FILE *f);
 };
