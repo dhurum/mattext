@@ -34,6 +34,7 @@ class Text {
 class FileReader : public Text {
  public:
   enum class Status { Finished, WouldBlock, Error };
+
   FileReader(const Config &config, const Terminal &terminal);
   void reset(size_t line_len, size_t lines_num);
   FileReader::Status read(FILE *f);
@@ -51,4 +52,8 @@ class FileReader : public Text {
   size_t longest_line_len;
   mutable size_t current_out_line_id;
   bool prev_line_finished;
+  char mbchar_buf[4];
+  size_t mbchar_id;
+
+  FileReader::Status readLine(FILE *f);
 };

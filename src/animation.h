@@ -26,7 +26,7 @@ Mattext is distributed in the hope that it will be useful,
 #include <functional>
 #include "config.h"
 #include "terminal.h"
-#include "file_stream.h"
+#include "file_reader.h"
 
 class Animation {
  public:

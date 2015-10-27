@@ -78,7 +78,8 @@ set(CMAKE_CXX_FLAGS
   -Winit-self
   -Wtype-limits
   -Wempty-body
-  -O2
+  #-O2
+  -g
   --std=c++1y
 )
 #add additional warning option for gcc

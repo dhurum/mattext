@@ -82,6 +82,7 @@ bool FileStream::tryRewind() {
 }
 
 void FileStream::readCb(ev::io &w, int revents) {
+  //TODO: throw errors from read, here catch them and prepend with filename
   switch (file_reader.read((*current_file).first)) {
     case FileReader::Status::Finished:
       io_watcher.stop();

@@ -19,6 +19,8 @@ Mattext is distributed in the hope that it will be useful,
 
 *******************************************************************************/
 
+#include <wchar.h>
+#include <string.h>
 #include "file_reader.h"
 
 FileReader::FileReader(const Config &config, const Terminal &terminal)
@@ -40,31 +42,41 @@ void FileReader::reset(size_t line_len, size_t lines_num) {
     }
   }
 
+  for (auto &line_len : line_lens) {
+    line_len = 0;
+  }
+
   current_line_id = 0;
   line_max_len = line_len;
   longest_line_len = 0;
   current_out_line_id = 0;
   prev_line_finished = true;
+  mbchar_id = 0;
 }
 
 FileReader::Status FileReader::read(FILE *f) {
-  while (true) {
-    errno = 0;
-    auto &cur_line = lines[current_line_id];
-    wchar_t *ret = fgetws(cur_line.data(), line_max_len + 1, f);
+  if (current_line_id == lines.size()) {
+    return FileReader::Status::Finished;
+  }
 
-    if (!ret) {
-      if (!errno) {
-        return FileReader::Status::Finished;
-      }
-      if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
+  while (true) {
+    switch(readLine(f)) {
+      case FileReader::Status::WouldBlock:
         return FileReader::Status::WouldBlock;
-      }
-      return FileReader::Status::Error;
+      case FileReader::Status::Error:
+        return FileReader::Status::Error;
+      case FileReader::Status::Finished:
+        break;
     }
 
-    size_t line_len = wcslen(cur_line.data());
-    if (cur_line.data()[line_len - 1] == '\n') {
+    auto &cur_line = lines[current_line_id];
+    auto &line_len = line_lens[current_line_id];
+
+    if (!line_len) {
+      return FileReader::Status::Finished;
+    }
+
+    if (cur_line[line_len - 1] == '\n') {
       --line_len;
       bool _prev_line_finished = prev_line_finished;
       prev_line_finished = true;
@@ -79,13 +91,57 @@ FileReader::Status FileReader::read(FILE *f) {
       prev_line_finished = false;
     }
 
-    line_lens[current_line_id] = line_len;
     if (longest_line_len < line_len) {
       longest_line_len = line_len;
     }
     ++current_line_id;
 
     if (current_line_id == lines.size()) {
+      return FileReader::Status::Finished;
+    }
+  }
+}
+
+FileReader::Status FileReader::readLine(FILE *f) {
+  auto &cur_symbol_id = line_lens[current_line_id];
+  mbstate_t mbs;
+  if (cur_symbol_id == line_max_len) {
+    return FileReader::Status::Finished;
+  }
+
+  while (true) {
+    auto &cur_symbol = lines[current_line_id][cur_symbol_id];
+    cur_symbol = '\0';
+
+    for (; mbchar_id < 4; ++mbchar_id) {
+      errno = 0;
+      mbchar_buf[mbchar_id] = fgetc(f);
+      if (mbchar_buf[mbchar_id] == EOF) {
+        if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
+          return FileReader::Status::WouldBlock;
+        }
+        else if (errno) {
+          return FileReader::Status::Error;
+        }
+
+        mbchar_id = 0;
+        return FileReader::Status::Finished;
+      }
+
+      memset(&mbs, 0, sizeof(mbs));
+      size_t res = mbrtowc(&cur_symbol, mbchar_buf, mbchar_id + 1, &mbs);
+
+      if (res == (size_t)-1) {
+        return FileReader::Status::Error;
+      } else if (res == (size_t)-2) {
+        continue;
+      }
+      break;
+    }
+    mbchar_id = 0;
+    ++cur_symbol_id;
+    if ((cur_symbol == '\n') || (cur_symbol_id == line_max_len)) {
+      lines[current_line_id][cur_symbol_id] = '\0';
       return FileReader::Status::Finished;
     }
   }

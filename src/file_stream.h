@@ -33,6 +33,7 @@ class FileStream {
   FileStream(const Config &config, const Terminal &terminal);
   ~FileStream();
   void stop();
+  //TODO: remove line_max_len and lines_num, and get them from terminal
   void read(std::function<void(const Text &text)> on_read,
             std::function<void()> on_end, size_t line_max_len,
             size_t lines_num);
