@@ -19,17 +19,18 @@ Mattext is distributed in the hope that it will be useful,
 
 *******************************************************************************/
 
-#include <wchar.h>
-#include <string.h>
-#include <stdexcept>
 #include "file_reader.h"
+#include "file_forward_reader.h"
+#include "file_backward_reader.h"
 
 FileReader::FileReader(const Config &config, const Terminal &terminal)
-    : config(config), terminal(terminal) {
-  reset();
-}
+    : config(config),
+      terminal(terminal),
+      forward_reader(std::make_unique<ForwardReader>(lines, line_lens, config)),
+      backward_reader(
+          std::make_unique<BackwardReader>(lines, line_lens, config)) {}
 
-void FileReader::reset() {
+void FileReader::reset(FileIO::Direction direction) {
   bool resized = false;
   size_t line_len = terminal.getWidth();
   size_t lines_num = terminal.getHeight();
@@ -49,135 +50,26 @@ void FileReader::reset() {
     line_len = 0;
   }
 
-  current_line_id = 0;
-  line_max_len = line_len;
-  longest_line_len = 0;
-  current_out_line_id = 0;
-  prev_line_finished = true;
-  mbchar_id = 0;
+  if (direction == FileIO::Direction::Forward) {
+    reader = forward_reader.get();
+  } else {
+    reader = backward_reader.get();
+  }
+  reader->reset();
 }
 
-bool FileReader::read(FILE *f) {
-  if (current_line_id == lines.size()) {
-    return true;
-  }
-
-  while (true) {
-    if (!readLine(f)) {
-      return false;
-    }
-
-    auto &cur_line = lines[current_line_id];
-    auto &line_len = line_lens[current_line_id];
-
-    if (!line_len) {
-      return true;
-    }
-
-    if (cur_line[line_len - 1] == '\n') {
-      --line_len;
-      bool _prev_line_finished = prev_line_finished;
-      prev_line_finished = true;
-
-      if (!line_len && !_prev_line_finished) {
-        size_t prev_line_id = current_line_id - 1;
-        lines[prev_line_id][line_lens[prev_line_id]] = '\n';
-        lines[prev_line_id][line_lens[prev_line_id] + 1] = '\0';
-        continue;
-      }
-    } else {
-      prev_line_finished = false;
-    }
-
-    if (longest_line_len < line_len) {
-      longest_line_len = line_len;
-    }
-    ++current_line_id;
-
-    if (current_line_id == lines.size()) {
-      return true;
-    }
-  }
-}
-
-bool FileReader::readLine(FILE *f) {
-  auto &cur_symbol_id = line_lens[current_line_id];
-  mbstate_t mbs;
-  if (cur_symbol_id == line_max_len) {
-    return true;
-  }
-
-  while (true) {
-    auto &cur_symbol = lines[current_line_id][cur_symbol_id];
-    cur_symbol = '\0';
-
-    for (; mbchar_id < 4; ++mbchar_id) {
-      errno = 0;
-      mbchar_buf[mbchar_id] = fgetc(f);
-      if (mbchar_buf[mbchar_id] == EOF) {
-        if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
-          return false;
-        }
-        else if (errno) {
-          throw std::runtime_error(strerror(errno));
-        }
-
-        mbchar_id = 0;
-        return true;
-      }
-
-      memset(&mbs, 0, sizeof(mbs));
-      size_t res = mbrtowc(&cur_symbol, mbchar_buf, mbchar_id + 1, &mbs);
-
-      if (res == (size_t)-1) {
-        throw std::runtime_error(strerror(errno));
-      } else if (res == (size_t)-2) {
-        continue;
-      }
-      break;
-    }
-    mbchar_id = 0;
-    ++cur_symbol_id;
-    if ((cur_symbol == '\n') || (cur_symbol_id == line_max_len)) {
-      lines[current_line_id][cur_symbol_id] = '\0';
-      return true;
-    }
-  }
+bool FileReader::read(FileIO &f) {
+  return reader->read(f);
 }
 
 size_t FileReader::linesRead() const {
-  return current_line_id;
+  return reader->linesRead();
 }
 
-wchar_t FileReader::get(size_t _column, size_t _row) const {
-  int start_row =
-      config.center_vert ? ((terminal.getHeight() - current_line_id) / 2) : 0;
-  int row = static_cast<int>(_row) - start_row;
-
-  if ((row < 0) || (row >= static_cast<int>(current_line_id))) {
-    return L' ';
-  }
-
-  size_t line_len =
-      config.center_horiz_longest ? longest_line_len : line_lens[row];
-  int start_column =
-      config.center_horiz ? ((terminal.getWidth() - line_len) / 2) : 0;
-  int column = static_cast<int>(_column) - start_column;
-
-  if ((column < 0) || (column >= static_cast<int>(line_lens[row]))) {
-    return L' ';
-  }
-
-  if (lines[row][column] == '\n') {
-    return L' ';
-  }
-
-  return lines[row][column];
+wchar_t FileReader::get(size_t column, size_t row) const {
+  return reader->get(column, row);
 }
 
 const wchar_t *FileReader::getLine() const {
-  if (current_out_line_id >= current_line_id) {
-    return nullptr;
-  }
-  return lines[current_out_line_id++].data();
+  return reader->getLine();
 }

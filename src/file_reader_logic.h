@@ -21,34 +21,13 @@ Mattext is distributed in the hope that it will be useful,
 
 #pragma once
 
-#include <vector>
-#include <memory>
-#include "config.h"
-#include "terminal.h"
-#include "file_reader_logic.h"
 #include "file_io.h"
 
-class Text {
+class FileReaderLogic {
  public:
+  virtual void reset() = 0;
+  virtual bool read(FileIO &f) = 0;
+  virtual size_t linesRead() const = 0;
   virtual wchar_t get(size_t column, size_t row) const = 0;
   virtual const wchar_t *getLine() const = 0;
-};
-
-class FileReader : public Text {
- public:
-  FileReader(const Config &config, const Terminal &terminal);
-  void reset(FileIO::Direction direction);
-  bool read(FileIO &f);
-  size_t linesRead() const;
-  wchar_t get(size_t column, size_t row) const override;
-  const wchar_t *getLine() const override;
-
- private:
-  const Config &config;
-  const Terminal &terminal;
-  std::vector<std::vector<wchar_t>> lines;
-  std::vector<size_t> line_lens;
-  std::unique_ptr<FileReaderLogic> forward_reader;
-  std::unique_ptr<FileReaderLogic> backward_reader;
-  FileReaderLogic *reader;
 };

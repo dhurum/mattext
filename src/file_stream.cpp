@@ -28,22 +28,16 @@ Mattext is distributed in the hope that it will be useful,
 FileStream::FileStream(const Config &config, const Terminal &terminal)
     : config(config), terminal(terminal), file_reader(config, terminal) {
   for (auto name : config.files) {
-    FILE *file = fopen(name, "r");
-    if (!file) {
-      std::ostringstream err;
-      err << "Can't open file '" << name << "'";
-      throw std::runtime_error(err.str());
-    }
-    addFile(file, name);
+    files.push_back(std::make_unique<FileIO>(name));
   }
 
   if (!files.size()) {
-    if (isatty(fileno(stdin))) {
+    if (isatty(STDIN_FILENO)) {
       throw std::runtime_error(
           "Please, specify input files or pipe something "
           "to program input");
     }
-    addFile(stdin, "stdin");
+    files.push_back(std::make_unique<FileIO>(nullptr));
   }
 
   current_file = files.begin();
@@ -51,66 +45,59 @@ FileStream::FileStream(const Config &config, const Terminal &terminal)
 
 FileStream::~FileStream() {
   stop();
-  for (auto &file : files) {
-    fclose(file.first);
-  }
 }
 
-void FileStream::addFile(FILE *file, const char *name) {
-  int flags = fcntl(fileno(file), F_GETFL, 0);
-  fcntl(fileno(file), F_SETFL, flags | O_NONBLOCK);
-  files.push_back(std::make_pair(file, name));
-}
+bool FileStream::nextFile() {
+  auto prev_file = current_file;
 
-bool FileStream::tryRewind() {
-  if (!config.infinite) {
-    if (on_end) {
-      on_end();
+  if (direction == FileIO::Direction::Forward) {
+    ++current_file;
+    if (current_file != files.end()) {
+      (**prev_file).stop();
+      (**current_file).newPage(direction);
+      return true;
     }
+  } else if (current_file != files.begin()) {
+    --current_file;
+    (**prev_file).stop();
+    (**current_file).newPage(direction);
+    return true;
+  }
+  if (!config.infinite) {
+    end_reached = true;
     return false;
   }
-  for (auto &file : files) {
-    if (fseek(file.first, 0, SEEK_SET)) {
-      std::ostringstream err;
-      err << "Can't rewind file '" << file.second
-          << "' for 'infinite' option: " << strerror(errno);
-      throw std::runtime_error(err.str());
-    }
+
+  if (direction == FileIO::Direction::Forward) {
+    current_file = files.begin();
+  } else {
+    current_file = files.end();
+    --current_file;
   }
-  current_file = files.begin();
+
+  (**prev_file).stop();
+  (**current_file).newPage(direction);
   return true;
 }
 
 void FileStream::readCb(ev::io &w, int revents) {
-  bool ret;
-  try {
-    ret = file_reader.read((*current_file).first);
-  } catch (std::exception &e) {
-    io_watcher.stop();
-    std::ostringstream err;
-    err << "Can't read file '" << (*current_file).second
-      << "': " << e.what();
-    throw std::runtime_error(err.str());
-  }
-
-  if (ret) {
-    io_watcher.stop();
-    if (file_reader.linesRead()) {
-      on_read(file_reader);
-    } else {
-      ++current_file;
-      if ((current_file != files.end()) || tryRewind()) {
-        io_watcher.start(fileno((*current_file).first), ev::READ);
-      }
-    }
-  }
-  else {
+  if (!file_reader.read(**current_file)) {
     size_t block_lines =
-      (config.block_lines < 0) ? terminal.getHeight() : config.block_lines;
+        (config.block_lines < 0) ? terminal.getHeight() : config.block_lines;
     if (file_reader.linesRead() >= block_lines) {
       io_watcher.stop();
       on_read(file_reader);
     }
+    return;
+  }
+
+  io_watcher.stop();
+  if (file_reader.linesRead()) {
+    on_read(file_reader);
+  } else if (nextFile()) {
+    io_watcher.start((**current_file).fno(), ev::READ);
+  } else if (on_end) {
+    on_end();
   }
 }
 
@@ -119,15 +106,24 @@ void FileStream::stop() {
 }
 
 void FileStream::read(std::function<void(const Text &text)> _on_read,
-                      std::function<void()> _on_end) {
-  if ((current_file == files.end()) && !tryRewind()) {
-    return;
+                      std::function<void()> _on_end,
+                      FileIO::Direction _direction) {
+  if (end_reached) {
+    if (_direction == direction) {
+      return;
+    } else if (_direction == FileIO::Direction::Backward) {
+      --current_file;
+    }
   }
 
+  end_reached = false;
   on_read = _on_read;
   on_end = _on_end;
-  file_reader.reset();
+  direction = _direction;
+
+  (**current_file).newPage(direction);
+  file_reader.reset(direction);
 
   io_watcher.set<FileStream, &FileStream::readCb>(this);
-  io_watcher.start(fileno((*current_file).first), ev::READ);
+  io_watcher.start((**current_file).fno(), ev::READ);
 }

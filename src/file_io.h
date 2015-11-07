@@ -21,34 +21,32 @@ Mattext is distributed in the hope that it will be useful,
 
 #pragma once
 
-#include <vector>
-#include <memory>
-#include "config.h"
-#include "terminal.h"
-#include "file_reader_logic.h"
-#include "file_io.h"
+static const size_t mbchar_size = 4;
 
-class Text {
+class FileIO {
  public:
-  virtual wchar_t get(size_t column, size_t row) const = 0;
-  virtual const wchar_t *getLine() const = 0;
-};
-
-class FileReader : public Text {
- public:
-  FileReader(const Config &config, const Terminal &terminal);
-  void reset(FileIO::Direction direction);
-  bool read(FileIO &f);
-  size_t linesRead() const;
-  wchar_t get(size_t column, size_t row) const override;
-  const wchar_t *getLine() const override;
+  enum class Direction { Forward, Backward };
+  enum class Status { Ok, End, WouldBlock };
+  FileIO(const char *name);
+  ~FileIO();
+  void stop();
+  void newPage(Direction direction);
+  Status read(wchar_t &symbol);
+  void unread();
+  int fno();
 
  private:
-  const Config &config;
-  const Terminal &terminal;
-  std::vector<std::vector<wchar_t>> lines;
-  std::vector<size_t> line_lens;
-  std::unique_ptr<FileReaderLogic> forward_reader;
-  std::unique_ptr<FileReaderLogic> backward_reader;
-  FileReaderLogic *reader;
+  int fd;
+  const char *name;
+  bool is_pipe = false;
+  char mbchar_buf[mbchar_size];
+  size_t mbchar_id = 0;
+  Direction direction = Direction::Forward;
+  size_t bytes_read = 0;
+  size_t prev_bytes_read = 0;
+  bool started = false;
+  bool active = false;
+
+  Status readForward(wchar_t &symbol);
+  Status readBackward(wchar_t &symbol);
 };

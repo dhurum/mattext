@@ -27,6 +27,7 @@ Mattext is distributed in the hope that it will be useful,
 #include "config.h"
 #include "terminal.h"
 #include "file_reader.h"
+#include "file_io.h"
 
 class FileStream {
  public:
@@ -34,19 +35,23 @@ class FileStream {
   ~FileStream();
   void stop();
   void read(std::function<void(const Text &text)> on_read,
-            std::function<void()> on_end);
+            std::function<void()> on_end,
+            FileIO::Direction direction = FileIO::Direction::Forward);
 
  private:
   const Config &config;
   const Terminal &terminal;
   FileReader file_reader;
-  std::list<std::pair<FILE *, const char *>> files;
-  std::list<std::pair<FILE *, const char *>>::iterator current_file;
+  using FileList = std::list<std::unique_ptr<FileIO>>;
+  FileList files;
+  FileList::iterator current_file;
   ev::io io_watcher;
   std::function<void(const Text &text)> on_read;
   std::function<void()> on_end;
+  FileIO::Direction direction;
+  bool end_reached = false;
 
   void readCb(ev::io &w, int revents);
-  void addFile(FILE *file, const char *name);
-  bool tryRewind();
+  bool nextFile();
+  void switchDirection();
 };

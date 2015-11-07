@@ -22,33 +22,32 @@ Mattext is distributed in the hope that it will be useful,
 #pragma once
 
 #include <vector>
-#include <memory>
-#include "config.h"
-#include "terminal.h"
 #include "file_reader_logic.h"
-#include "file_io.h"
+#include "config.h"
 
-class Text {
+class BackwardReader : public FileReaderLogic {
  public:
-  virtual wchar_t get(size_t column, size_t row) const = 0;
-  virtual const wchar_t *getLine() const = 0;
-};
-
-class FileReader : public Text {
- public:
-  FileReader(const Config &config, const Terminal &terminal);
-  void reset(FileIO::Direction direction);
-  bool read(FileIO &f);
-  size_t linesRead() const;
+  BackwardReader(std::vector<std::vector<wchar_t>> &lines,
+                 std::vector<size_t> &line_lens, const Config &config);
+  void reset() override;
+  bool read(FileIO &f) override;
+  size_t linesRead() const override;
   wchar_t get(size_t column, size_t row) const override;
   const wchar_t *getLine() const override;
 
  private:
+  std::vector<std::vector<wchar_t>> &lines;
+  std::vector<size_t> &line_lens;
   const Config &config;
-  const Terminal &terminal;
-  std::vector<std::vector<wchar_t>> lines;
-  std::vector<size_t> line_lens;
-  std::unique_ptr<FileReaderLogic> forward_reader;
-  std::unique_ptr<FileReaderLogic> backward_reader;
-  FileReaderLogic *reader;
+  std::vector<wchar_t> cache;
+  size_t cache_len = 0;
+  size_t cache_start;
+  bool line_started;
+  size_t lines_read;
+  mutable size_t current_out_line_id;
+  size_t longest_line_len;
+  bool first_page;
+
+  bool readLine(FileIO &f);
+  bool processCache();
 };

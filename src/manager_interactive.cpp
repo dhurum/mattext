@@ -70,17 +70,26 @@ void ManagerInteractive::inputCb(ev::io &w, int revents) {
     case '\4':
       quit();
       break;
-    default:
+    case 'f':
+    case ' ':
       getNextPage();
+      break;
+    case 'b':
+      getPrevPage();
+      break;
+    default:
       break;
   }
 }
 
 void ManagerInteractive::checkPending() {
   if (next_page_pending || config.noninteract) {
-    next_page_pending = false;
     getNextPage();
+  } else if (prev_page_pending) {
+    getPrevPage();
   }
+  next_page_pending = false;
+  prev_page_pending = false;
 }
 
 void ManagerInteractive::getNextPage() {
@@ -91,6 +100,16 @@ void ManagerInteractive::getNextPage() {
   file_stream.read([this](const Text &text) {
     this->animation.play(text, [this]() { this->checkPending(); });
   }, nullptr);
+}
+
+void ManagerInteractive::getPrevPage() {
+  if (animation.isPlaying()) {
+    prev_page_pending = true;
+    return;
+  }
+  file_stream.read([this](const Text &text) {
+    this->animation.play(text, [this]() { this->checkPending(); });
+  }, nullptr, FileIO::Direction::Backward);
 }
 
 void ManagerInteractive::quit() {

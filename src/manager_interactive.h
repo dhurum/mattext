@@ -44,7 +44,9 @@ class ManagerInteractive : public Manager {
   const Terminal &terminal;
   Animation animation;
   bool next_page_pending = false;
+  bool prev_page_pending = false;
 
   void getNextPage();
+  void getPrevPage();
   void quit();
 };
