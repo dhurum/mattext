@@ -78,15 +78,22 @@ set(CMAKE_CXX_FLAGS
   -Winit-self
   -Wtype-limits
   -Wempty-body
-  -O2
   --std=c++1y
 )
 #add additional warning option for gcc
 if(CMAKE_COMPILER_IS_GNUCXX)
   set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -Wclobbered)
 endif()
+
+if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+  set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -O2)
+endif()
+
+set (CMAKE_CXX_FLAGS_DEBUG -g3)
+
 #transform list to string
 string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+string(REPLACE ";" " " CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
 
 set(${TARGET}_SRCS
   src/config.cpp
