@@ -17,8 +17,9 @@ Usage: `mattext [options] file1 [file2 ...]` or `cat file | mattext [options]`.
 * `-e`, `--without-japanese` - Do not use Japanese symbols;
 
 ###Commands:
-* `q` or `Q` or `ctrl + D` - Exit program;
-* any other key - Show next page;
+* `q`, `Q`, `ctrl + D` - Exit program;
+* `f`, `F`, ` ` - Show next page;
+* `b`, `B` - Show previous page;
 
 ###Building:
 If you use Archlinux, you can take [package](https://aur.archlinux.org/packages/mattext/) from aur, or PKGBUILD from [archlinux](https://github.com/dhurum/mattext/tree/archlinux) branch.  
