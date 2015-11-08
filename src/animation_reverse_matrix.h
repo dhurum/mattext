@@ -19,25 +19,18 @@ Mattext is distributed in the hope that it will be useful,
 
 *******************************************************************************/
 
-#include <stdexcept>
-#include <sstream>
-#include "animation.h"
+#pragma once
+
+#include <ev++.h>
+#include <vector>
+#include <functional>
 #include "animation_matrix.h"
-#include "animation_reverse_matrix.h"
+#include "config.h"
+#include "terminal.h"
+#include "file_reader.h"
 
-AnimationStore::AnimationStore(const Config &config, const Terminal &terminal)
-    : config(config), terminal(terminal) {
-  animations["matrix"] = std::make_unique<MatrixAnimation>(config, terminal);
-  animations["reverse_matrix"] =
-      std::make_unique<ReverseMatrixAnimation>(config, terminal);
-}
-
-Animation *AnimationStore::get(std::string name) const {
-  try {
-    return animations.at(name).get();
-  } catch (std::out_of_range &e) {
-    std::ostringstream err;
-    err << "Unknown animation '" << name << "'";
-    throw std::runtime_error(err.str());
-  }
-}
+class ReverseMatrixAnimation : public MatrixAnimation {
+ public:
+  using MatrixAnimation::MatrixAnimation;
+  void tick(ev::timer &w, int revents);
+};

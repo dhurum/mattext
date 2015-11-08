@@ -42,9 +42,12 @@ class ManagerInteractive : public Manager {
   const Config &config;
   FileStream &file_stream;
   const Terminal &terminal;
-  Animation animation;
-  bool next_page_pending = false;
-  bool prev_page_pending = false;
+  AnimationStore animations;
+  Animation *forward_animation;
+  Animation *backward_animation;
+  Animation *current_animation;
+  enum class Action { None, Next, Prev };
+  Action pending_action = Action::None;
 
   void getNextPage();
   void getPrevPage();

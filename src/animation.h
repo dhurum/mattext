@@ -22,33 +22,30 @@ Mattext is distributed in the hope that it will be useful,
 #pragma once
 
 #include <ev++.h>
-#include <vector>
 #include <functional>
+#include <unordered_map>
+#include <memory>
+#include <string>
 #include "config.h"
 #include "terminal.h"
 #include "file_reader.h"
 
 class Animation {
  public:
-  Animation(const Config &config, const Terminal &terminal);
-  void play(const Text &text, std::function<void()> on_stop);
-  void stop();
-  bool isPlaying();
-  void tick(ev::timer &w, int revents);
+  virtual ~Animation(){};
+  virtual void play(const Text &text, std::function<void()> on_stop) = 0;
+  virtual void stop() = 0;
+  virtual bool isPlaying() = 0;
+  virtual void tick(ev::timer &w, int revents) = 0;
+};
+
+class AnimationStore {
+ public:
+  AnimationStore(const Config &config, const Terminal &terminal);
+  Animation *get(std::string) const;
 
  private:
   const Config &config;
   const Terminal &terminal;
-  const Text *text;
-  ev::timer timer_watcher;
-  bool is_playing = false;
-  std::function<void()> on_stop;
-  std::vector<size_t> col_lengths;
-  std::vector<size_t> col_offsets;
-  size_t max_col_length;
-  size_t tick_id;
-  size_t tail_length = 10;
-
-  void init();
-  wchar_t getRandSymbol();
+  std::unordered_map<std::string, std::unique_ptr<Animation>> animations;
 };
