@@ -25,6 +25,7 @@ Mattext is distributed in the hope that it will be useful,
 
 class FileReaderLogic {
  public:
+  virtual ~FileReaderLogic() {};
   virtual void reset() = 0;
   virtual bool read(FileIO &f) = 0;
   virtual size_t linesRead() const = 0;
