@@ -22,6 +22,7 @@ Mattext is distributed in the hope that it will be useful,
 #pragma once
 
 #include <list>
+#include <string>
 
 #define DEFAULT_DELAY 80
 #define DEFAULT_BLOCK_LINES 1
@@ -39,6 +40,8 @@ class Config {
   bool without_japanese = false;
   bool infinite = false;
   std::list<const char *> files;
+  std::string animation_next{"matrix"};
+  std::string animation_prev{"reverse_matrix"};
 
   Config(int argc, char *argv[]);
 };

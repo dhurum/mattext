@@ -36,13 +36,13 @@ class Animation {
   virtual void play(const Text &text, std::function<void()> on_stop) = 0;
   virtual void stop() = 0;
   virtual bool isPlaying() = 0;
-  virtual void tick(ev::timer &w, int revents) = 0;
 };
 
 class AnimationStore {
  public:
   AnimationStore(const Config &config, const Terminal &terminal);
   Animation *get(std::string) const;
+  static std::string getNames();
 
  private:
   const Config &config;

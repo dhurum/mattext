@@ -19,33 +19,14 @@ Mattext is distributed in the hope that it will be useful,
 
 *******************************************************************************/
 
+#include <string>
 #include <argp.h>
 #include <stdlib.h>
 #include "config.h"
+#include "animation.h"
 
 #define _MAKE_STR(a) #a
 #define MAKE_STR(a) _MAKE_STR(a)
-
-static argp_option options[] = {
-    {"delay", 'd', "value", 0,
-     "Delay between redraws in milliseconds, default " MAKE_STR(DEFAULT_DELAY),
-     1},
-    {"rand-len", 'l', "value", 0, "Max length of random symbols columns", 1},
-    {"non-interact", 'n', NULL, 0, "Run in non-interactive mode", 2},
-    {"infinite", 'i', NULL, 0,
-     "At the end of file start reading it from the beginning", 2},
-    {"block-lines", 'b', "value", 0,
-     "Block until at least specified number of lines is read, "
-     "default " MAKE_STR(DEFAULT_BLOCK_LINES),
-     2},
-    {"block-page", 'B', NULL, 0, "Block until full page is read", 2},
-    {"colorize", 'c', NULL, 0, "Colorize output", 3},
-    {"center-horiz", 'C', NULL, 0, "Center text horizontally", 3},
-    {"center-horiz-longest", 'L', NULL, 0,
-     "Center text horizontally by longest string", 3},
-    {"center-vert", 'v', NULL, 0, "Center text vertically", 3},
-    {"without-japanese", 'e', NULL, 0, "Do not use Japanese symbols", 4},
-    {0}};
 
 static bool getIntArg(int &value, char *str) {
   char *end = NULL;
@@ -105,6 +86,16 @@ static error_t parseOptions(int key, char *arg, struct argp_state *state) {
     case ARGP_KEY_ARG:
       config->files.push_back(arg);
       break;
+    case 'a':
+      config->animation_next = arg;
+      config->animation_prev = arg;
+      break;
+    case -1:
+      config->animation_next = arg;
+      break;
+    case -2:
+      config->animation_prev = arg;
+      break;
     default:
       break;
   }
@@ -112,57 +103,35 @@ static error_t parseOptions(int key, char *arg, struct argp_state *state) {
 }
 
 Config::Config(int argc, char *argv[]) {
+  static std::string animation_desc =
+      "Animation for switching pages. Available animations are " +
+      AnimationStore::getNames();
+  static argp_option options[] = {
+      {"delay", 'd', "value", 0,
+       "Delay between redraws in milliseconds, default " MAKE_STR(
+           DEFAULT_DELAY),
+       1},
+      {"rand-len", 'l', "value", 0, "Max length of random symbols columns", 1},
+      {"non-interact", 'n', NULL, 0, "Run in non-interactive mode", 2},
+      {"infinite", 'i', NULL, 0,
+       "At the end of file start reading it from the beginning", 2},
+      {"block-lines", 'b', "value", 0,
+       "Block until at least specified number of lines is read, "
+       "default " MAKE_STR(DEFAULT_BLOCK_LINES),
+       2},
+      {"block-page", 'B', NULL, 0, "Block until full page is read", 2},
+      {"colorize", 'c', NULL, 0, "Colorize output", 3},
+      {"center-horiz", 'C', NULL, 0, "Center text horizontally", 3},
+      {"center-horiz-longest", 'L', NULL, 0,
+       "Center text horizontally by longest string", 3},
+      {"center-vert", 'v', NULL, 0, "Center text vertically", 3},
+      {"without-japanese", 'e', NULL, 0, "Do not use Japanese symbols", 4},
+      {"animation", 'a', "name", 0, animation_desc.c_str(), 5},
+      {"animation-next", -1, "name", 0, "Animation for showing next page", 5},
+      {"animation-prev", -2, "name", 0, "Animation for showing previous page",
+       5},
+      {0}};
+
   argp argp_opts = {options, parseOptions, "file[, file, ...]"};
   argp_parse(&argp_opts, argc, argv, 0, 0, this);
 }
-
-#if 0
-void Config::addFile(char *name) {
-  size_t len = strlen(name);
-  if (!len) {
-    return;
-  }
-
-  real_files = true;
-  FILE *file = fopen(name, "r");
-
-  if (!file) {
-    fprintf(stderr, "Can't open file %s!\n", name);
-    return;
-  }
-  int flags = fcntl(fileno(file), F_GETFL, 0);
-  fcntl(fileno(file), F_SETFL, flags | O_NONBLOCK);
-
-  files.push_back(file);
-  file_it = files.begin();
-}
-
-FILE *Config::getNextFile() {
-  if (files.empty()) {
-    if (stdin_returned && !config::infinite) {
-      return NULL;
-    }
-    if (!stdin_returned) {
-      int flags = fcntl(fileno(stdin), F_GETFL, 0);
-      fcntl(fileno(stdin), F_SETFL, flags | O_NONBLOCK);
-    }
-
-    stdin_returned = true;
-    return stdin;
-  }
-
-  if (file_it == files.end()) {
-    if (!config::infinite) {
-      return NULL;
-    }
-    file_it = files.begin();
-  }
-
-  fseek(*file_it, 0, SEEK_SET);
-
-  FILE *ret = *file_it;
-  ++file_it;
-
-  return ret;
-}
-#endif

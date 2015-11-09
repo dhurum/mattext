@@ -19,37 +19,21 @@ Mattext is distributed in the hope that it will be useful,
 
 *******************************************************************************/
 
-#pragma once
+#include "animation_none.h"
 
-#include <ev++.h>
-#include "config.h"
-#include "file_stream.h"
-#include "terminal.h"
-#include "animation.h"
-#include "manager.h"
+NoneAnimation::NoneAnimation(const Terminal &terminal) : terminal(terminal) {}
 
-class ManagerInteractive : public Manager {
- public:
-  ManagerInteractive(const Config &config, FileStream &file_stream,
-                     const Terminal &terminal);
-  ~ManagerInteractive() override;
-  void inputCb(ev::io &w, int revents);
-  void checkPending();
+void NoneAnimation::play(const Text &text, std::function<void()> on_stop) {
+  for (size_t row = 0; row < terminal.getHeight(); ++row) {
+    for (size_t col = 0; col < terminal.getWidth(); ++col) {
+      terminal.set(col, row, text.get(col, row));
+    }
+  }
+  terminal.show();
+}
 
- private:
-  ev::io io_watcher;
-  int tty_fno;
-  const Config &config;
-  FileStream &file_stream;
-  const Terminal &terminal;
-  AnimationStore animations;
-  Animation *animation_next;
-  Animation *animation_prev;
-  Animation *current_animation;
-  enum class Action { None, Next, Prev };
-  Action pending_action = Action::None;
+void NoneAnimation::stop() {}
 
-  void getNextPage();
-  void getPrevPage();
-  void quit();
-};
+bool NoneAnimation::isPlaying() {
+  return false;
+}

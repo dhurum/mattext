@@ -21,16 +21,12 @@ Mattext is distributed in the hope that it will be useful,
 
 #pragma once
 
-#include <ev++.h>
-#include <vector>
-#include <functional>
 #include "animation_matrix.h"
-#include "config.h"
-#include "terminal.h"
-#include "file_reader.h"
 
 class ReverseMatrixAnimation : public MatrixAnimation {
  public:
   using MatrixAnimation::MatrixAnimation;
-  void tick(ev::timer &w, int revents);
+
+ private:
+  void tick(ev::timer &w, int revents) override;
 };

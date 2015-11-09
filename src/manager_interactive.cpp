@@ -39,9 +39,9 @@ ManagerInteractive::ManagerInteractive(const Config &config,
   io_watcher.set<ManagerInteractive, &ManagerInteractive::inputCb>(this);
   io_watcher.start(tty_fno, ev::READ);
 
-  forward_animation = animations.get("matrix");
-  backward_animation = animations.get("reverse_matrix");
-  current_animation = forward_animation;
+  animation_next = animations.get(config.animation_next);
+  animation_prev = animations.get(config.animation_prev);
+  current_animation = animation_next;
 
   getNextPage();
 }
@@ -107,7 +107,7 @@ void ManagerInteractive::getNextPage() {
     pending_action = Action::Next;
     return;
   }
-  current_animation = forward_animation;
+  current_animation = animation_next;
   file_stream.read([this](const Text &text) {
     this->current_animation->play(text, [this]() { this->checkPending(); });
   }, nullptr);
@@ -118,7 +118,7 @@ void ManagerInteractive::getPrevPage() {
     pending_action = Action::Prev;
     return;
   }
-  current_animation = backward_animation;
+  current_animation = animation_prev;
   file_stream.read([this](const Text &text) {
     this->current_animation->play(text, [this]() { this->checkPending(); });
   }, nullptr, FileIO::Direction::Backward);

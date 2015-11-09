@@ -21,35 +21,16 @@ Mattext is distributed in the hope that it will be useful,
 
 #pragma once
 
-#include <ev++.h>
-#include "config.h"
-#include "file_stream.h"
-#include "terminal.h"
+#include <vector>
 #include "animation.h"
-#include "manager.h"
 
-class ManagerInteractive : public Manager {
+class NoneAnimation : public Animation {
  public:
-  ManagerInteractive(const Config &config, FileStream &file_stream,
-                     const Terminal &terminal);
-  ~ManagerInteractive() override;
-  void inputCb(ev::io &w, int revents);
-  void checkPending();
+  NoneAnimation(const Terminal &terminal);
+  void play(const Text &text, std::function<void()> on_stop) override;
+  void stop() override;
+  bool isPlaying() override;
 
- private:
-  ev::io io_watcher;
-  int tty_fno;
-  const Config &config;
-  FileStream &file_stream;
+ protected:
   const Terminal &terminal;
-  AnimationStore animations;
-  Animation *animation_next;
-  Animation *animation_prev;
-  Animation *current_animation;
-  enum class Action { None, Next, Prev };
-  Action pending_action = Action::None;
-
-  void getNextPage();
-  void getPrevPage();
-  void quit();
 };

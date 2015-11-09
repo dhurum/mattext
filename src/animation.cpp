@@ -24,12 +24,32 @@ Mattext is distributed in the hope that it will be useful,
 #include "animation.h"
 #include "animation_matrix.h"
 #include "animation_reverse_matrix.h"
+#include "animation_none.h"
+
+struct AnimationInfo {
+  std::string name;
+  std::function<std::unique_ptr<Animation>(const Config &, const Terminal &)>
+      make;
+};
+
+static std::list<AnimationInfo> animation_info{
+    {"matrix",
+     [](const Config &config, const Terminal &terminal) {
+       return std::make_unique<MatrixAnimation>(config, terminal);
+     }},
+    {"reverse_matrix",
+     [](const Config &config, const Terminal &terminal) {
+       return std::make_unique<ReverseMatrixAnimation>(config, terminal);
+     }},
+    {"none", [](const Config &config, const Terminal &terminal) {
+       return std::make_unique<NoneAnimation>(terminal);
+     }}};
 
 AnimationStore::AnimationStore(const Config &config, const Terminal &terminal)
     : config(config), terminal(terminal) {
-  animations["matrix"] = std::make_unique<MatrixAnimation>(config, terminal);
-  animations["reverse_matrix"] =
-      std::make_unique<ReverseMatrixAnimation>(config, terminal);
+  for (auto &info : animation_info) {
+    animations[info.name] = info.make(config, terminal);
+  }
 }
 
 Animation *AnimationStore::get(std::string name) const {
@@ -40,4 +60,17 @@ Animation *AnimationStore::get(std::string name) const {
     err << "Unknown animation '" << name << "'";
     throw std::runtime_error(err.str());
   }
+}
+
+std::string AnimationStore::getNames() {
+  std::string names;
+
+  for (auto &info : animation_info) {
+    if (names.size()) {
+      names += ", ";
+    }
+    names += info.name;
+  }
+
+  return names;
 }

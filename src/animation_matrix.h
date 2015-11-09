@@ -21,21 +21,15 @@ Mattext is distributed in the hope that it will be useful,
 
 #pragma once
 
-#include <ev++.h>
 #include <vector>
-#include <functional>
 #include "animation.h"
-#include "config.h"
-#include "terminal.h"
-#include "file_reader.h"
 
 class MatrixAnimation : public Animation {
  public:
   MatrixAnimation(const Config &config, const Terminal &terminal);
-  void play(const Text &text, std::function<void()> on_stop);
-  void stop();
-  bool isPlaying();
-  void tick(ev::timer &w, int revents);
+  void play(const Text &text, std::function<void()> on_stop) override;
+  void stop() override;
+  bool isPlaying() override;
 
  protected:
   const Config &config;
@@ -53,5 +47,6 @@ class MatrixAnimation : public Animation {
   size_t tail_length = 10;
 
   void init();
+  virtual void tick(ev::timer &w, int revents);
   wchar_t getRandSymbol();
 };
