@@ -76,11 +76,15 @@ void ManagerInteractive::inputCb(ev::io &w, int revents) {
       break;
     case 'f':
     case 'F':
+    case 'j':
+    case 'J':
     case ' ':
       getNextPage();
       break;
     case 'b':
     case 'B':
+    case 'k':
+    case 'K':
       getPrevPage();
       break;
     default:
