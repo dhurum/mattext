@@ -43,6 +43,8 @@ class MatrixAnimation : public Animation {
   const Text *text;
   ev::timer timer_watcher;
   bool is_playing = false;
+  size_t terminal_width;
+  size_t terminal_height;
   std::function<void()> on_stop;
   std::vector<size_t> col_lengths;
   std::vector<size_t> col_offsets;

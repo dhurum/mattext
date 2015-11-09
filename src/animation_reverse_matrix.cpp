@@ -22,35 +22,35 @@ Mattext is distributed in the hope that it will be useful,
 #include "animation_reverse_matrix.h"
 
 void ReverseMatrixAnimation::tick(ev::timer &w, int revents) {
-  int terminal_height = static_cast<int>(terminal.getHeight());
+  int _terminal_height = static_cast<int>(terminal_height);
   bool stopped = true;
 
   for (size_t col = 0; col < terminal.getWidth(); ++col) {
-    int col_start = terminal_height - 1 - tick_id + col_offsets[col];
+    int col_start = _terminal_height - 1 - tick_id + col_offsets[col];
     int col_end = col_start + col_lengths[col];
     int text_start = col_end + tail_length + 1;
 
-    if ((col_start >= terminal_height) || (text_start < 0)) {
+    if ((col_start >= _terminal_height) || (text_start < 0)) {
       continue;
     }
 
     stopped = false;
 
     // Make previous bottom symbol not bold
-    if ((col_start >= 0) && (col_start <= terminal_height - 2)) {
+    if ((col_start >= 0) && (col_start <= _terminal_height - 2)) {
       bool bold = ((rand() % 100) > 90) ? true : false;
       terminal.set(col, col_start + 1, terminal.get(col, col_start + 1), bold,
                    ColorGreen, ColorBlack);
     }
 
     // Place new random symbol to bottom of column
-    if (col_start < terminal_height) {
+    if (col_start < _terminal_height) {
       terminal.set(col, col_start, getRandSymbol(), true, ColorGreen,
                    ColorBlack);
     }
 
     // Change random symbol in column
-    int row_id = rand() % terminal_height;
+    int row_id = rand() % _terminal_height;
     if ((row_id >= col_end) && (row_id < col_start)) {
       bool bold = ((rand() % 100) > 60) ? true : false;
       terminal.set(col, row_id, getRandSymbol(), bold, ColorGreen, ColorBlack);
@@ -58,13 +58,13 @@ void ReverseMatrixAnimation::tick(ev::timer &w, int revents) {
 
     // Start showing some of real symbols in column
     int fade_row_id = (col_end + 1) + rand() % tail_length;
-    if ((fade_row_id >= 0) && (fade_row_id < terminal_height)) {
+    if ((fade_row_id >= 0) && (fade_row_id < _terminal_height)) {
       terminal.set(col, fade_row_id, text->get(col, fade_row_id), false,
                    ColorGreen, ColorBlack);
     }
 
     // Show real text symbol
-    if ((text_start >= 0) && (text_start < terminal_height)) {
+    if ((text_start >= 0) && (text_start < _terminal_height)) {
       terminal.set(col, text_start, text->get(col, text_start), false,
                    ColorGreen, ColorBlack);
     }
