@@ -31,6 +31,8 @@ else()
   string(REPLACE "s." "sw." CURSES_NCURSES_LIBRARY "${CURSES_NCURSES_LIBRARY}")
 endif()
 
+include_directories(${CURSES_INCLUDE_PATH})
+
 #check if we need to include some dir to get curses with wchar_t support
 include(CheckCXXSymbolExists)
 set(CMAKE_REQUIRED_DEFINITIONS -D_XOPEN_SOURCE_EXTENDED)
@@ -68,7 +70,6 @@ set(TARGET_LIBS
   ${CURSES_NCURSES_LIBRARY}
   ${LIBEV_LIBRARY}
 )
-include_directories(${CURSES_INCLUDE_PATH})
 
 set(CMAKE_CXX_FLAGS
   ${CMAKE_CXX_FLAGS}

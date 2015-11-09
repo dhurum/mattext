@@ -22,7 +22,9 @@ Usage: `mattext [options] file1 [file2 ...]` or `cat file | mattext [options]`.
 * <kbd>b</kbd>, <kbd>k</kbd> - Show previous page;
 
 ###Building:
-If you use Archlinux, you can take [package](https://aur.archlinux.org/packages/mattext/) from aur, or PKGBUILD from [archlinux](https://github.com/dhurum/mattext/tree/archlinux) branch.  
+You will need a c++ compiler with c++14 (c++1y) support, ncurses built with widechar support and libev.
+
+If you use Archlinux, you can take stable [package](https://aur.archlinux.org/packages/mattext/) from aur, or PKGBUILD from [archlinux](https://github.com/dhurum/mattext/tree/archlinux) branch.  
 If you use OSX, you can take homebrew formula from [osx](https://github.com/dhurum/mattext/tree/osx) branch.
 
 To build mattext from sources open terminal, go to mattext dir, and run `mkdir build; cd build; cmake ../ && make`.  
