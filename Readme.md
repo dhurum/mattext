@@ -30,9 +30,9 @@ You will need a c++ compiler with c++14 (c++1y) support, ncurses built with wide
 If you use Archlinux, you can take stable [package](https://aur.archlinux.org/packages/mattext/) from aur, or PKGBUILD from [archlinux](https://github.com/dhurum/mattext/tree/archlinux) branch.  
 If you use OSX, you can take homebrew formula from [osx](https://github.com/dhurum/mattext/tree/osx) branch.
 
-To build mattext from sources open terminal, go to mattext dir, and run `mkdir build; cd build; cmake ../ && make`.  
+To build mattext from sources open terminal, go to mattext dir, and run `mkdir build; cd build; cmake ../ && make`
 This will build mattext binary. To test it, you can run `./mattext -c ../mattext.cpp`.
-If you would like to install mattext, you can run `make install`.
+If you would like to install mattext, you can run `make install`
 
 ###Examples:
 * `mattext -c file` - Show file, colorizing console, one page at a time, and exit at the end;
