@@ -81,7 +81,7 @@ bool ForwardReader::read(FileIO &f) {
 
 bool ForwardReader::readLine(FileIO &f) {
   auto &cur_symbol_id = line_lens[current_line_id];
-  const size_t line_max_len = lines[0].size();
+  const size_t line_max_len = lines[0].size() - 1;
   if (cur_symbol_id == line_max_len) {
     return true;
   }
@@ -95,8 +95,13 @@ bool ForwardReader::readLine(FileIO &f) {
       return true;
     }
     ++cur_symbol_id;
-    if ((cur_symbol == '\n') || (cur_symbol_id == line_max_len)) {
+
+    if (cur_symbol == '\n') {
       lines[current_line_id][cur_symbol_id] = '\0';
+      return true;
+    } else if (cur_symbol_id == line_max_len) {
+      f.unread();
+      cur_symbol = '\0';
       return true;
     }
   }

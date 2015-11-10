@@ -31,7 +31,7 @@ BackwardReader::BackwardReader(std::vector<std::vector<wchar_t>> &lines,
 
 void BackwardReader::reset() {
   // cache size should be equal to longest possible string
-  const size_t cache_size = lines.size() * (lines[0].size() - 1);
+  const size_t cache_size = lines.size() * (lines[0].size() - 2) + 1;
   if (cache.size() != cache_size) {
     cache.resize(cache_size);
   }
@@ -93,7 +93,7 @@ bool BackwardReader::processCache() {
       longest_line_len = copy_len;
     }
     current_out_line_id = current_line;
-    --current_line;
+    ++current_line;
     --lines_remaining;
     --cache_lines;
     ++lines_read;
