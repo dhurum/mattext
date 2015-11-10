@@ -40,7 +40,6 @@ class ForwardReader : public FileReaderLogic {
   std::vector<size_t> &line_lens;
   const Config &config;
   size_t current_line_id;
-  bool prev_line_finished;
   size_t longest_line_len;
   mutable size_t current_out_line_id;
 

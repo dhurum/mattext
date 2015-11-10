@@ -31,7 +31,6 @@ ForwardReader::ForwardReader(std::vector<std::vector<wchar_t>> &lines,
 
 void ForwardReader::reset() {
   current_line_id = 0;
-  prev_line_finished = true;
   longest_line_len = 0;
   current_out_line_id = 0;
 }
@@ -55,17 +54,6 @@ bool ForwardReader::read(FileIO &f) {
 
     if (cur_line[line_len - 1] == '\n') {
       --line_len;
-      bool _prev_line_finished = prev_line_finished;
-      prev_line_finished = true;
-
-      if (!line_len && !_prev_line_finished) {
-        size_t prev_line_id = current_line_id - 1;
-        lines[prev_line_id][line_lens[prev_line_id]] = '\n';
-        lines[prev_line_id][line_lens[prev_line_id] + 1] = '\0';
-        continue;
-      }
-    } else {
-      prev_line_finished = false;
     }
 
     if (longest_line_len < line_len) {
@@ -101,6 +89,7 @@ bool ForwardReader::readLine(FileIO &f) {
       return true;
     } else if (cur_symbol_id == line_max_len) {
       f.unread();
+      --cur_symbol_id;
       cur_symbol = '\0';
       return true;
     }
