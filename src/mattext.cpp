@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
     Terminal terminal(config);
     FileStream file_stream(config, terminal);
     std::unique_ptr<Manager> manager;
-    if (terminal.isTty()) {
+    if (terminal.stdoutIsTty()) {
       manager =
           std::make_unique<ManagerInteractive>(config, file_stream, terminal);
     } else {

@@ -21,8 +21,8 @@ Usage: `mattext [options] file1 [file2 ...]` or `cat file | mattext [options]`.
 
 ###Commands:
 * <kbd>q</kbd>, <kbd>ctrl + D</kbd> - Exit program;
-* <kbd>f</kbd>, <kbd>j</kbd>, <kbd>space</kbd> - Show next page;
-* <kbd>b</kbd>, <kbd>k</kbd> - Show previous page;
+* <kbd>f</kbd>, <kbd>j</kbd>, <kbd>space</kbd>, <kbd>PgDown</kbd>, <kbd>Down</kbd> - Show next page;
+* <kbd>b</kbd>, <kbd>k</kbd>, <kbd>PgUp</kbd>, <kbd>Up</kbd> - Show previous page;
 
 ###Building:
 You will need a c++ compiler with c++14 (c++1y) support, ncurses built with widechar support and libev.

@@ -19,11 +19,11 @@ Mattext is distributed in the hope that it will be useful,
 
 *******************************************************************************/
 
-#include <fcntl.h>
-#include <unistd.h>
 #include <sstream>
 #include <stdexcept>
 #include <string.h>
+#include <ev++.h>
+#include <ncurses.h>
 #include "manager_interactive.h"
 
 ManagerInteractive::ManagerInteractive(const Config &config,
@@ -33,11 +33,7 @@ ManagerInteractive::ManagerInteractive(const Config &config,
       file_stream(file_stream),
       terminal(terminal),
       animations(config, terminal) {
-  tty_fno = open("/dev/tty", O_RDONLY);
-  fcntl(tty_fno, F_SETFL, fcntl(tty_fno, F_GETFL, 0) | O_NONBLOCK);
-
-  io_watcher.set<ManagerInteractive, &ManagerInteractive::inputCb>(this);
-  io_watcher.start(tty_fno, ev::READ);
+  terminal.onKeyPress([this](int cmd) { this->inputCb(cmd); });
 
   animation_next = animations.get(config.animation_next);
   animation_prev = animations.get(config.animation_prev);
@@ -46,28 +42,7 @@ ManagerInteractive::ManagerInteractive(const Config &config,
   getNextPage();
 }
 
-ManagerInteractive::~ManagerInteractive() {
-  close(tty_fno);
-}
-
-void ManagerInteractive::inputCb(ev::io &w, int revents) {
-  int cmd = 0;
-
-  int ret = read(tty_fno, &cmd, sizeof(int));
-
-  if (ret == -1) {
-    if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
-      return;
-    }
-    std::ostringstream err;
-    err << "Can't read from terminal: " << strerror(errno);
-    throw std::runtime_error(err.str());
-  }
-
-  if (!ret) {
-    quit();
-  }
-
+void ManagerInteractive::inputCb(int cmd) {
   switch (cmd) {
     case 'q':
     case 'Q':
@@ -79,12 +54,16 @@ void ManagerInteractive::inputCb(ev::io &w, int revents) {
     case 'j':
     case 'J':
     case ' ':
+    case KEY_NPAGE:
+    case KEY_DOWN:
       getNextPage();
       break;
     case 'b':
     case 'B':
     case 'k':
     case 'K':
+    case KEY_PPAGE:
+    case KEY_UP:
       getPrevPage();
       break;
     default:
@@ -125,8 +104,8 @@ void ManagerInteractive::getPrevPage() {
 }
 
 void ManagerInteractive::quit() {
-  io_watcher.stop();
   file_stream.stop();
   current_animation->stop();
-  io_watcher.loop.break_loop(ev::ALL);
+  terminal.stop();
+  ev::get_default_loop().break_loop(ev::ALL);
 }

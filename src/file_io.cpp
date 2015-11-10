@@ -28,41 +28,35 @@ Mattext is distributed in the hope that it will be useful,
 #include "file_io.h"
 
 FileIO::FileIO(const char *name) : name(name) {
-  if (!name) {
-    name = "stdin";
-    fd = STDIN_FILENO;
-    is_pipe = true;
-
-    int flags = fcntl(fd, F_GETFL, 0);
-    if (flags < 0) {
-      std::ostringstream err;
-      err << "Can't get flags of stdin: " << strerror(errno);
-      throw std::runtime_error(err.str());
-    }
-    if (fcntl(fd, F_SETFL, flags | O_NONBLOCK) == -1) {
-      std::ostringstream err;
-      err << "Can't set flags for stdin: " << strerror(errno);
-      throw std::runtime_error(err.str());
-    }
-  } else {
-    fd = open(name, O_RDONLY | O_NONBLOCK);
-  }
+  fd = open(name, O_RDONLY | O_NONBLOCK);
   if (fd == -1) {
     std::ostringstream err;
     err << "Can't open file '" << name << "': " << strerror(errno);
     throw std::runtime_error(err.str());
   }
 
-  if (fd != STDIN_FILENO) {
-    struct stat file_stat;
-    if (fstat(fd, &file_stat)) {
-      std::ostringstream err;
-      err << "Can't get file '" << name << "' stat: " << strerror(errno);
-      throw std::runtime_error(err.str());
-    }
-    if (S_ISFIFO(file_stat.st_mode)) {
-      is_pipe = true;
-    }
+  struct stat file_stat;
+  if (fstat(fd, &file_stat)) {
+    std::ostringstream err;
+    err << "Can't get file '" << name << "' stat: " << strerror(errno);
+    throw std::runtime_error(err.str());
+  }
+  if (S_ISFIFO(file_stat.st_mode)) {
+    is_pipe = true;
+  }
+}
+
+FileIO::FileIO(int stdin_fd) : fd(stdin_fd), name("stdin"), is_pipe(true) {
+  int flags = fcntl(fd, F_GETFL, 0);
+  if (flags < 0) {
+    std::ostringstream err;
+    err << "Can't get flags of stdin: " << strerror(errno);
+    throw std::runtime_error(err.str());
+  }
+  if (fcntl(fd, F_SETFL, flags | O_NONBLOCK) == -1) {
+    std::ostringstream err;
+    err << "Can't set flags for stdin: " << strerror(errno);
+    throw std::runtime_error(err.str());
   }
 }
 

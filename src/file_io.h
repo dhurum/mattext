@@ -28,6 +28,7 @@ class FileIO {
   enum class Direction { Forward, Backward };
   enum class Status { Ok, End, WouldBlock };
   FileIO(const char *name);
+  FileIO(int stdin_fd);
   ~FileIO();
   void stop();
   void newPage(Direction direction);

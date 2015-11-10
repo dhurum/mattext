@@ -32,12 +32,12 @@ FileStream::FileStream(const Config &config, const Terminal &terminal)
   }
 
   if (!files.size()) {
-    if (isatty(STDIN_FILENO)) {
+    if (terminal.stdinIsTty()) {
       throw std::runtime_error(
           "Please, specify input files or pipe something "
           "to program input");
     }
-    files.push_back(std::make_unique<FileIO>(nullptr));
+    files.push_back(std::make_unique<FileIO>(terminal.stdinFd()));
   }
 
   current_file = files.begin();

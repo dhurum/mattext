@@ -21,7 +21,6 @@ Mattext is distributed in the hope that it will be useful,
 
 #pragma once
 
-#include <ev++.h>
 #include "config.h"
 #include "file_stream.h"
 #include "terminal.h"
@@ -32,13 +31,9 @@ class ManagerInteractive : public Manager {
  public:
   ManagerInteractive(const Config &config, FileStream &file_stream,
                      const Terminal &terminal);
-  ~ManagerInteractive() override;
-  void inputCb(ev::io &w, int revents);
   void checkPending();
 
  private:
-  ev::io io_watcher;
-  int tty_fno;
   const Config &config;
   FileStream &file_stream;
   const Terminal &terminal;
@@ -51,5 +46,6 @@ class ManagerInteractive : public Manager {
 
   void getNextPage();
   void getPrevPage();
+  void inputCb(int cmd);
   void quit();
 };

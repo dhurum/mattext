@@ -23,6 +23,9 @@ Mattext is distributed in the hope that it will be useful,
 
 #include <vector>
 #include <map>
+#include <functional>
+#include <unistd.h>
+#include <ev++.h>
 #include "config.h"
 
 enum Colors {
@@ -43,24 +46,34 @@ class Terminal {
   ~Terminal();
   size_t getWidth() const;
   size_t getHeight() const;
-  bool isTty();
+  bool stdoutIsTty() const;
+  bool stdinIsTty() const;
   void set(size_t column, size_t row, wchar_t symbol, bool bold = false,
            short fg = ColorDefault, short bg = ColorDefault) const;
   wchar_t get(size_t column, size_t row) const;
   void setColors(short fg, short bg) const;
   void show() const;
   void clear() const;
+  int stdinFd() const;
+  void onKeyPress(std::function<void(int)> on_key) const;
+  void stop() const;
 
  private:
   size_t width;
   size_t height;
-  bool is_tty = true;
+  bool stdout_is_tty = true;
+  bool stdin_is_tty = true;
   bool use_colors = false;
   short default_fg = -1;
   short default_bg = -1;
   std::vector<short> colors;
   mutable std::map<std::pair<short, short>, short> color_pairs;
+  int tty_fd;
+  int stdin_fd = STDIN_FILENO;
+  mutable ev::io io_watcher;
+  mutable std::function<void(int)> on_key_press;
 
   short getColor(short color) const;
   short getColorPair(short fg, short bg) const;
+  void inputCb(ev::io &w, int revents);
 };

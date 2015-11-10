@@ -28,23 +28,41 @@ Mattext is distributed in the hope that it will be useful,
 #include <assert.h>
 #include <sys/ioctl.h>
 #include <string.h>
+#include <fcntl.h>
 #include "terminal.h"
 
 Terminal::Terminal(const Config &config)
     : colors{COLOR_BLACK, COLOR_RED,     COLOR_GREEN, COLOR_YELLOW,
              COLOR_BLUE,  COLOR_MAGENTA, COLOR_CYAN,  COLOR_WHITE} {
-  if (!isatty(fileno(stdout))) {
+  if (!isatty(STDOUT_FILENO)) {
     struct winsize w_size;
     if (ioctl(0, TIOCGWINSZ, &w_size) == -1) {
       std::ostringstream err;
       err << "Can't get terminal size via ioctl: " << strerror(errno);
       throw std::runtime_error(err.str());
     }
-    is_tty = false;
+    stdout_is_tty = false;
     width = w_size.ws_col;
     height = w_size.ws_row;
 
     return;
+  }
+
+  tty_fd = open("/dev/tty", O_RDONLY | O_NONBLOCK);
+  if (tty_fd == -1) {
+    std::ostringstream err;
+    err << "Can't open file '/dev/tty': " << strerror(errno);
+    throw std::runtime_error(err.str());
+  }
+
+  if (!isatty(STDIN_FILENO)) {
+    stdin_fd = dup(STDIN_FILENO);
+    if ((stdin_fd == -1) || (dup2(tty_fd, STDIN_FILENO) == -1)) {
+      std::ostringstream err;
+      err << "Can't redirect stdin to '/dev/tty': " << strerror(errno);
+      throw std::runtime_error(err.str());
+    }
+    stdin_is_tty = false;
   }
 
   initscr();
@@ -52,6 +70,7 @@ Terminal::Terminal(const Config &config)
   noecho();
   cbreak();
   curs_set(0);
+  keypad(stdscr, true);
 
   if (has_colors() && config.use_colors) {
     use_colors = true;
@@ -67,9 +86,15 @@ Terminal::Terminal(const Config &config)
 }
 
 Terminal::~Terminal() {
-  if (is_tty) {
+  if (stdout_is_tty) {
     endwin();
   }
+  if (!stdin_is_tty) {
+    close(stdin_fd);
+  } else {
+    close(tty_fd);
+  }
+  stop();
 }
 
 size_t Terminal::getWidth() const {
@@ -80,8 +105,12 @@ size_t Terminal::getHeight() const {
   return height;
 }
 
-bool Terminal::isTty() {
-  return is_tty;
+bool Terminal::stdoutIsTty() const {
+  return stdout_is_tty;
+}
+
+bool Terminal::stdinIsTty() const {
+  return stdin_is_tty;
 }
 
 short Terminal::getColor(short color) const {
@@ -122,7 +151,7 @@ short Terminal::getColorPair(short fg, short bg) const {
 
 void Terminal::set(size_t column, size_t row, wchar_t symbol, bool bold,
                    short fg, short bg) const {
-  assert(is_tty);
+  assert(stdout_is_tty);
   wchar_t str[] = {symbol, L'\0'};
   cchar_t cchar;
   attr_t attr = bold ? A_BOLD : A_NORMAL;
@@ -137,7 +166,7 @@ void Terminal::set(size_t column, size_t row, wchar_t symbol, bool bold,
 }
 
 wchar_t Terminal::get(size_t column, size_t row) const {
-  assert(is_tty);
+  assert(stdout_is_tty);
   cchar_t cchar;
 
   mvin_wch(row, column, &cchar);
@@ -153,7 +182,7 @@ wchar_t Terminal::get(size_t column, size_t row) const {
 }
 
 void Terminal::setColors(short fg, short bg) const {
-  assert(is_tty);
+  assert(stdout_is_tty);
   if (!use_colors) {
     return;
   }
@@ -163,11 +192,34 @@ void Terminal::setColors(short fg, short bg) const {
 }
 
 void Terminal::show() const {
-  assert(is_tty);
+  assert(stdout_is_tty);
   refresh();
 }
 
 void Terminal::clear() const {
-  assert(is_tty);
+  assert(stdout_is_tty);
   erase();
+}
+
+int Terminal::stdinFd() const {
+  return stdin_fd;
+}
+
+void Terminal::stop() const {
+  io_watcher.stop();
+}
+
+void Terminal::inputCb(ev::io &w, int revents) {
+  on_key_press(getch());
+}
+
+void Terminal::onKeyPress(std::function<void(int)> _on_key_press) const {
+  if (!_on_key_press) {
+    return;
+  }
+  if (!on_key_press) {
+    io_watcher.set<Terminal, &Terminal::inputCb>(const_cast<Terminal*>(this));
+    io_watcher.start(tty_fd, ev::READ);
+  }
+  on_key_press = _on_key_press;
 }
