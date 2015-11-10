@@ -17,6 +17,8 @@ mattext \- Simple matrix\-style pager.
 .RB [\| \-C \|]
 .RB [\| \-V \|]
 .RB [\| \-e \|]
+.RB [\| \-a
+.IR name \|]
 .RI [\| file \ .\|.\|. \| ]
 
 .SH DESCRIPTION
@@ -25,10 +27,13 @@ Mattext shows text with matrix\-style rain\-of\-symbols animation during page ch
 
 .SH COMMANDS
 .TP
-.B q\fR or \fBQ\fR or \fBctrl + D
+.B q\fR or \fBctrl + D
 Exit program.
 .TP
-.B any other key
+.B f\fR or \fBj\fR or \fBspace\fR or \fBPgDown\fR or \fBDown
+Show next page.
+.TP
+.B b\fR or \fBk\fR or \fBPgUp\fR or \fBUp
 Show next page.
 
 .SH OPTIONS
@@ -65,6 +70,15 @@ Center text vertically.
 .TP
 .B \-e\fR,\ \fB\-\-without\-japanese
 Do not use Japanese symbols.
+.TP
+.B \-a\ \fIname\fR,\ \fB\-\-animation\ \fIname
+Animation for switching pages. Available animations are matrix, reverse_matrix, none.
+.TP
+.B \-\-animation\-next
+Animation for showing next page.
+.TP
+.B \-\-animation\-prev
+Animation for showing prev page.
 
 .SH EXAMPLES
 .TP
