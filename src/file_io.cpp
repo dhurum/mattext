@@ -170,11 +170,11 @@ void FileIO::stop() {
 }
 
 void FileIO::newPage(Direction _direction) {
-  if (!active && (started || (_direction == Direction::Backward))) {
+  if (!active && (started || (_direction == Direction::Backward)) && !is_pipe) {
     int ret = 0;
     if (_direction == Direction::Forward) {
       ret = lseek(fd, 0, SEEK_SET);
-    } else if (!is_pipe) {
+    } else {
       ret = lseek(fd, 0, SEEK_END);
     }
     if (ret == -1) {

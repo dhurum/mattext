@@ -24,8 +24,7 @@ Mattext is distributed in the hope that it will be useful,
 #include "file_backward_reader.h"
 
 FileReader::FileReader(const Config &config, const Terminal &terminal)
-    : config(config),
-      terminal(terminal),
+    : terminal(terminal),
       forward_reader(std::make_unique<ForwardReader>(lines, line_lens, config)),
       backward_reader(
           std::make_unique<BackwardReader>(lines, line_lens, config)) {}

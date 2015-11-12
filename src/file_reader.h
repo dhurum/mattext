@@ -44,7 +44,6 @@ class FileReader : public Text {
   std::wstring getLine() const override;
 
  private:
-  const Config &config;
   const Terminal &terminal;
   std::vector<std::vector<wchar_t>> lines;
   std::vector<size_t> line_lens;

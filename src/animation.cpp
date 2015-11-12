@@ -45,8 +45,7 @@ static std::list<AnimationInfo> animation_info{
        return std::make_unique<NoneAnimation>(terminal);
      }}};
 
-AnimationStore::AnimationStore(const Config &config, const Terminal &terminal)
-    : config(config), terminal(terminal) {
+AnimationStore::AnimationStore(const Config &config, const Terminal &terminal) {
   for (auto &info : animation_info) {
     animations[info.name] = info.make(config, terminal);
   }

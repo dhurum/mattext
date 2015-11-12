@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
       manager =
           std::make_unique<ManagerInteractive>(config, file_stream, terminal);
     } else {
-      manager = std::make_unique<ManagerPlain>(config, file_stream, terminal);
+      manager = std::make_unique<ManagerPlain>(file_stream);
     }
 
     ev_run(EV_DEFAULT, 0);

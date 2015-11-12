@@ -28,14 +28,11 @@ Mattext is distributed in the hope that it will be useful,
 
 class ManagerPlain : public Manager {
  public:
-  ManagerPlain(const Config &config, FileStream &file_stream,
-               const Terminal &terminal);
+  ManagerPlain(FileStream &file_stream);
   ~ManagerPlain() override;
   void read();
   void quit();
 
  private:
-  const Config &config;
   FileStream &file_stream;
-  const Terminal &terminal;
 };

@@ -26,9 +26,8 @@ Mattext is distributed in the hope that it will be useful,
 #include <string.h>
 #include "manager_plain.h"
 
-ManagerPlain::ManagerPlain(const Config &config, FileStream &file_stream,
-                           const Terminal &terminal)
-    : config(config), file_stream(file_stream), terminal(terminal) {
+ManagerPlain::ManagerPlain(FileStream &file_stream)
+    : file_stream(file_stream) {
   read();
 }
 

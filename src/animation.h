@@ -45,7 +45,5 @@ class AnimationStore {
   static std::string getNames();
 
  private:
-  const Config &config;
-  const Terminal &terminal;
   std::unordered_map<std::string, std::unique_ptr<Animation>> animations;
 };
