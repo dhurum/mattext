@@ -21,6 +21,7 @@ Mattext is distributed in the hope that it will be useful,
 
 #pragma once
 
+#include <string>
 #include "file_io.h"
 
 class FileReaderLogic {
@@ -30,5 +31,5 @@ class FileReaderLogic {
   virtual bool read(FileIO &f) = 0;
   virtual size_t linesRead() const = 0;
   virtual wchar_t get(size_t column, size_t row) const = 0;
-  virtual const wchar_t *getLine() const = 0;
+  virtual std::wstring getLine() const = 0;
 };

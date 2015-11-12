@@ -70,6 +70,6 @@ wchar_t FileReader::get(size_t column, size_t row) const {
   return reader->get(column, row);
 }
 
-const wchar_t *FileReader::getLine() const {
+std::wstring FileReader::getLine() const {
   return reader->getLine();
 }

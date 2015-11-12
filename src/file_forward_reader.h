@@ -33,7 +33,7 @@ class ForwardReader : public FileReaderLogic {
   bool read(FileIO &f) override;
   size_t linesRead() const override;
   wchar_t get(size_t column, size_t row) const override;
-  const wchar_t *getLine() const override;
+  std::wstring getLine() const override;
 
  private:
   std::vector<std::vector<wchar_t>> &lines;

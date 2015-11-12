@@ -102,7 +102,7 @@ size_t ForwardReader::linesRead() const {
 
 wchar_t ForwardReader::get(size_t _column, size_t _row) const {
   const size_t height = lines.size();
-  const size_t width = lines[0].size();
+  const size_t width = lines[0].size() - 2;
   int start_row = config.center_vert ? ((height - current_line_id) / 2) : 0;
   int row = static_cast<int>(_row) - start_row;
 
@@ -126,9 +126,29 @@ wchar_t ForwardReader::get(size_t _column, size_t _row) const {
   return lines[row][column];
 }
 
-const wchar_t *ForwardReader::getLine() const {
+std::wstring ForwardReader::getLine() const {
   if (current_out_line_id >= current_line_id) {
-    return nullptr;
+    return L"";
   }
-  return lines[current_out_line_id++].data();
+  if (!config.center_horiz) {
+    return lines[current_out_line_id++].data();
+  }
+
+  const size_t width = lines[0].size() - 2;
+  size_t line_len = config.center_horiz_longest
+                        ? longest_line_len
+                        : line_lens[current_out_line_id];
+  size_t padding = (width - line_len) / 2;
+  std::wstring str;
+  if (padding) {
+    str.append(padding, L' ');
+  }
+
+  str.append(lines[current_out_line_id].data());
+  if (lines[current_out_line_id][line_lens[current_out_line_id]] != '\n') {
+    str.append(L"\n");
+  }
+  ++current_out_line_id;
+
+  return str;
 }

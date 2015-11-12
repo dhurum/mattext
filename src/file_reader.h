@@ -31,7 +31,7 @@ Mattext is distributed in the hope that it will be useful,
 class Text {
  public:
   virtual wchar_t get(size_t column, size_t row) const = 0;
-  virtual const wchar_t *getLine() const = 0;
+  virtual std::wstring getLine() const = 0;
 };
 
 class FileReader : public Text {
@@ -41,7 +41,7 @@ class FileReader : public Text {
   bool read(FileIO &f);
   size_t linesRead() const;
   wchar_t get(size_t column, size_t row) const override;
-  const wchar_t *getLine() const override;
+  std::wstring getLine() const override;
 
  private:
   const Config &config;

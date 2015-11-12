@@ -38,12 +38,12 @@ void ManagerPlain::read() {
   file_stream.read(
       [this](const Text &text) {
         while (true) {
-          const wchar_t *line = text.getLine();
-          if (!line) {
+          auto line = text.getLine();
+          if (!line.length()) {
             this->read();
             return;
           }
-          if (fputws(line, stdout) == -1) {
+          if (fputws(line.c_str(), stdout) == -1) {
             std::ostringstream err;
             err << "Can't write to stdout: " << strerror(errno);
             throw std::runtime_error(err.str());
