@@ -218,7 +218,7 @@ void Terminal::onKeyPress(std::function<void(int)> _on_key_press) const {
     return;
   }
   if (!on_key_press) {
-    io_watcher.set<Terminal, &Terminal::inputCb>(const_cast<Terminal*>(this));
+    io_watcher.set<Terminal, &Terminal::inputCb>(const_cast<Terminal *>(this));
     io_watcher.start(tty_fd, ev::READ);
   }
   on_key_press = _on_key_press;

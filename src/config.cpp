@@ -104,8 +104,8 @@ static error_t parseOptions(int key, char *arg, struct argp_state *state) {
 
 Config::Config(int argc, char *argv[]) {
   static std::string animation_desc =
-      "Animation for switching pages. Available animations are " +
-      AnimationStore::getNames();
+      "Animation for switching pages. Available animations are "
+      + AnimationStore::getNames();
   static argp_option options[] = {
       {"delay", 'd', "value", 0,
        "Delay between redraws in milliseconds, default " MAKE_STR(

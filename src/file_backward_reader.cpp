@@ -67,8 +67,8 @@ bool BackwardReader::processCache() {
   const size_t line_len = lines[0].size() - 2;
   const size_t cache_end = cache_start + cache_len;
   size_t cache_lines = cache_len / line_len + (cache_len % line_len ? 1 : 0);
-  if ((cache[cache_end - 1] == '\n') && (cache_lines > 1) &&
-      ((cache_len % line_len) == 1)) {
+  if ((cache[cache_end - 1] == '\n') && (cache_lines > 1)
+      && ((cache_len % line_len) == 1)) {
     --cache_lines;
   }
   size_t start = cache_start;
@@ -81,8 +81,8 @@ bool BackwardReader::processCache() {
   while (cache_lines) {
     size_t copy_len =
         ((start + line_len) > cache_end) ? cache_end - start : line_len;
-    if (((start + copy_len + 1) == cache_end) &&
-        (cache[cache_end - 1] == '\n')) {
+    if (((start + copy_len + 1) == cache_end)
+        && (cache[cache_end - 1] == '\n')) {
       ++copy_len;
     }
     memcpy(lines[current_line].data(), cache.data() + start,

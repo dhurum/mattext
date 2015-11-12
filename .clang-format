@@ -1,0 +1,6 @@
+BasedOnStyle: Google
+AllowAllParametersOfDeclarationOnNextLine: false
+NamespaceIndentation: All
+AllowShortFunctionsOnASingleLine: Empty
+Standard: Cpp11
+BreakBeforeBinaryOperators: NonAssignment
