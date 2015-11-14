@@ -105,9 +105,11 @@ set(${TARGET}_SRCS
   src/file_backward_reader.cpp
   src/terminal.cpp
   src/animation.cpp
+  src/animation_generic.cpp
   src/animation_matrix.cpp
   src/animation_reverse_matrix.cpp
   src/animation_none.cpp
+  src/animation_fire.cpp
   src/manager_interactive.cpp
   src/manager_plain.cpp
   src/mattext.cpp

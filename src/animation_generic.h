@@ -23,13 +23,23 @@ Mattext is distributed in the hope that it will be useful,
 
 #include "animation.h"
 
-class NoneAnimation : public Animation {
+class GenericAnimation : public Animation {
  public:
-  NoneAnimation(const Terminal &terminal);
+  GenericAnimation(const Config &config, const Terminal &terminal);
   void play(const Text &text, std::function<void()> on_stop) override;
   void stop() override;
   bool isPlaying() override;
 
- private:
+ protected:
+  const Config &config;
   const Terminal &terminal;
+  const Text *text;
+  ev::timer timer_watcher;
+  bool is_playing = false;
+  size_t terminal_width;
+  size_t terminal_height;
+  std::function<void()> on_stop;
+
+  virtual void init() = 0;
+  virtual void tick(ev::timer &w, int revents) = 0;
 };

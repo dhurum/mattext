@@ -21,42 +21,16 @@ Mattext is distributed in the hope that it will be useful,
 
 #include "animation_matrix.h"
 
-MatrixAnimation::MatrixAnimation(const Config &config, const Terminal &terminal)
-    : config(config), terminal(terminal) {
+void MatrixAnimation::init() {
+  col_lengths.resize(terminal_width);
+  col_offsets.resize(terminal_width);
+  tick_id = 0;
+  
   if (config.rand_columns_len <= 0) {
     max_col_length = terminal.getHeight();
   } else {
     max_col_length = config.rand_columns_len;
   }
-}
-
-void MatrixAnimation::play(const Text &_text, std::function<void()> _on_stop) {
-  text = &_text;
-  on_stop = _on_stop;
-  init();
-  is_playing = true;
-  timer_watcher.set<MatrixAnimation, &MatrixAnimation::tick>(this);
-  timer_watcher.start(0., static_cast<double>(config.delay) / 1000.0);
-}
-
-void MatrixAnimation::stop() {
-  is_playing = false;
-  timer_watcher.stop();
-  if (on_stop) {
-    on_stop();
-  }
-}
-
-bool MatrixAnimation::isPlaying() {
-  return is_playing;
-}
-
-void MatrixAnimation::init() {
-  terminal_width = terminal.getWidth();
-  terminal_height = terminal.getHeight();
-  col_lengths.resize(terminal_width);
-  col_offsets.resize(terminal_width);
-  tick_id = 0;
 
   // Random symbols are organized into columns
   for (size_t i = 0; i < terminal_width; ++i) {

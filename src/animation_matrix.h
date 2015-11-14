@@ -22,31 +22,20 @@ Mattext is distributed in the hope that it will be useful,
 #pragma once
 
 #include <vector>
-#include "animation.h"
+#include "animation_generic.h"
 
-class MatrixAnimation : public Animation {
+class MatrixAnimation : public GenericAnimation {
  public:
-  MatrixAnimation(const Config &config, const Terminal &terminal);
-  void play(const Text &text, std::function<void()> on_stop) override;
-  void stop() override;
-  bool isPlaying() override;
+  using GenericAnimation::GenericAnimation;
 
  protected:
-  const Config &config;
-  const Terminal &terminal;
-  const Text *text;
-  ev::timer timer_watcher;
-  bool is_playing = false;
-  size_t terminal_width;
-  size_t terminal_height;
-  std::function<void()> on_stop;
   std::vector<size_t> col_lengths;
   std::vector<size_t> col_offsets;
   size_t max_col_length;
   size_t tick_id;
   size_t tail_length = 10;
 
-  void init();
-  virtual void tick(ev::timer &w, int revents);
+  void init() override;
+  virtual void tick(ev::timer &w, int revents) override;
   wchar_t getRandSymbol();
 };

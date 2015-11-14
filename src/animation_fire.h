@@ -21,15 +21,25 @@ Mattext is distributed in the hope that it will be useful,
 
 #pragma once
 
-#include "animation.h"
+#include <vector>
+#include <unordered_set>
+#include "animation_generic.h"
 
-class NoneAnimation : public Animation {
+//TODO: GenericAnimation
+
+class FireAnimation : public GenericAnimation {
  public:
-  NoneAnimation(const Terminal &terminal);
-  void play(const Text &text, std::function<void()> on_stop) override;
-  void stop() override;
-  bool isPlaying() override;
+  using GenericAnimation::GenericAnimation;
 
  private:
-  const Terminal &terminal;
+  size_t tick_id;
+  std::vector<size_t> fire_heights;
+  std::vector<size_t> fire_end_heights;
+  size_t max_fire_height;
+  size_t max_fire_end_height;
+  std::unordered_set<size_t> increased_cols;
+  std::unordered_set<size_t> decreased_ends;
+
+  void init() override;
+  virtual void tick(ev::timer &w, int revents) override;
 };

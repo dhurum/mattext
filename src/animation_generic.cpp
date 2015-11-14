@@ -19,17 +19,31 @@ Mattext is distributed in the hope that it will be useful,
 
 *******************************************************************************/
 
-#pragma once
+#include "animation_generic.h"
 
-#include "animation.h"
+GenericAnimation::GenericAnimation(const Config &config, const Terminal &terminal)
+    : config(config), terminal(terminal) {}
 
-class NoneAnimation : public Animation {
- public:
-  NoneAnimation(const Terminal &terminal);
-  void play(const Text &text, std::function<void()> on_stop) override;
-  void stop() override;
-  bool isPlaying() override;
+void GenericAnimation::play(const Text &_text, std::function<void()> _on_stop) {
+  text = &_text;
+  on_stop = _on_stop;
+  terminal_width = terminal.getWidth();
+  terminal_height = terminal.getHeight();
 
- private:
-  const Terminal &terminal;
-};
+  init();
+  is_playing = true;
+  timer_watcher.set<GenericAnimation, &GenericAnimation::tick>(this);
+  timer_watcher.start(0., static_cast<double>(config.delay) / 1000.0);
+}
+
+void GenericAnimation::stop() {
+  is_playing = false;
+  timer_watcher.stop();
+  if (on_stop) {
+    on_stop();
+  }
+}
+
+bool GenericAnimation::isPlaying() {
+  return is_playing;
+}
