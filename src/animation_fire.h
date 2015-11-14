@@ -25,8 +25,6 @@ Mattext is distributed in the hope that it will be useful,
 #include <unordered_set>
 #include "animation_generic.h"
 
-//TODO: GenericAnimation
-
 class FireAnimation : public GenericAnimation {
  public:
   using GenericAnimation::GenericAnimation;

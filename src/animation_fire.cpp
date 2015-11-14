@@ -88,7 +88,7 @@ void FireAnimation::tick(ev::timer &w, int revents) {
       terminal.set(col, fire_start, '|', false, ColorYellow, ColorRed);
     }
 
-    if (((height  + end_height) >= 2) && ((fire_start + 2) >= 0)
+    if (((height + end_height) >= 2) && ((fire_start + 2) >= 0)
         && ((fire_start + 2) < _terminal_height)) {
       terminal.set(col, fire_start + 2, '#', false, ColorRed, ColorYellow);
     }

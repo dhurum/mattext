@@ -21,7 +21,8 @@ Mattext is distributed in the hope that it will be useful,
 
 #include "animation_generic.h"
 
-GenericAnimation::GenericAnimation(const Config &config, const Terminal &terminal)
+GenericAnimation::GenericAnimation(const Config &config,
+                                   const Terminal &terminal)
     : config(config), terminal(terminal) {}
 
 void GenericAnimation::play(const Text &_text, std::function<void()> _on_stop) {

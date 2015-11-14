@@ -25,7 +25,7 @@ void MatrixAnimation::init() {
   col_lengths.resize(terminal_width);
   col_offsets.resize(terminal_width);
   tick_id = 0;
-  
+
   if (config.rand_columns_len <= 0) {
     max_col_length = terminal.getHeight();
   } else {
