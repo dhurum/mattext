@@ -24,6 +24,8 @@ Mattext is distributed in the hope that it will be useful,
 #include <unistd.h>
 #include <sstream>
 #include "file_stream.h"
+#include "config.h"
+#include "terminal.h"
 
 FileStream::FileStream(const Config &config, const Terminal &terminal)
     : config(config), terminal(terminal), file_reader(config, terminal) {

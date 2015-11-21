@@ -26,9 +26,11 @@ Mattext is distributed in the hope that it will be useful,
 #include <unordered_map>
 #include <memory>
 #include <string>
-#include "config.h"
-#include "terminal.h"
-#include "file_reader.h"
+#include <list>
+
+class Text;
+class Config;
+class Terminal;
 
 class Animation {
  public:

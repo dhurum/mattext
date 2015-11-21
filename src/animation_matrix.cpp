@@ -20,6 +20,9 @@ Mattext is distributed in the hope that it will be useful,
 *******************************************************************************/
 
 #include "animation_matrix.h"
+#include "terminal.h"
+#include "config.h"
+#include "file_reader.h"
 
 void MatrixAnimation::init() {
   col_lengths.resize(terminal_width);
@@ -27,7 +30,7 @@ void MatrixAnimation::init() {
   tick_id = 0;
 
   if (config.rand_columns_len <= 0) {
-    max_col_length = terminal.getHeight();
+    max_col_length = terminal_height;
   } else {
     max_col_length = config.rand_columns_len;
   }

@@ -23,7 +23,8 @@ Mattext is distributed in the hope that it will be useful,
 
 #include <vector>
 #include "file_reader_logic.h"
-#include "config.h"
+
+class Config;
 
 class BackwardReader : public FileReaderLogic {
  public:

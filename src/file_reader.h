@@ -23,10 +23,11 @@ Mattext is distributed in the hope that it will be useful,
 
 #include <vector>
 #include <memory>
-#include "config.h"
-#include "terminal.h"
 #include "file_reader_logic.h"
 #include "file_io.h"
+
+class Terminal;
+class Config;
 
 class Text {
  public:

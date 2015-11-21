@@ -22,7 +22,8 @@ Mattext is distributed in the hope that it will be useful,
 #pragma once
 
 #include <string>
-#include "file_io.h"
+
+class FileIO;
 
 class FileReaderLogic {
  public:

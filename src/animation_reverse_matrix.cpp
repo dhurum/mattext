@@ -20,12 +20,15 @@ Mattext is distributed in the hope that it will be useful,
 *******************************************************************************/
 
 #include "animation_reverse_matrix.h"
+#include "terminal.h"
+#include "config.h"
+#include "file_reader.h"
 
 void ReverseMatrixAnimation::tick(ev::timer &w, int revents) {
   int _terminal_height = static_cast<int>(terminal_height);
   bool stopped = true;
 
-  for (size_t col = 0; col < terminal.getWidth(); ++col) {
+  for (size_t col = 0; col < terminal_width; ++col) {
     int col_start = _terminal_height - 1 - tick_id + col_offsets[col];
     int col_end = col_start + col_lengths[col];
     int text_start = col_end + tail_length + 1;

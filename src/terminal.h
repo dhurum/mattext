@@ -26,7 +26,8 @@ Mattext is distributed in the hope that it will be useful,
 #include <functional>
 #include <unistd.h>
 #include <ev++.h>
-#include "config.h"
+
+class Config;
 
 enum Colors {
   ColorDefault = -1,

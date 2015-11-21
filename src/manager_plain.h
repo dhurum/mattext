@@ -21,10 +21,9 @@ Mattext is distributed in the hope that it will be useful,
 
 #pragma once
 
-#include "config.h"
-#include "file_stream.h"
-#include "terminal.h"
 #include "manager.h"
+
+class FileStream;
 
 class ManagerPlain : public Manager {
  public:

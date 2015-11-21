@@ -25,6 +25,9 @@ Mattext is distributed in the hope that it will be useful,
 #include <ev++.h>
 #include <ncurses.h>
 #include "manager_interactive.h"
+#include "config.h"
+#include "file_stream.h"
+#include "terminal.h"
 
 ManagerInteractive::ManagerInteractive(const Config &config,
                                        FileStream &file_stream,

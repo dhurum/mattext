@@ -20,6 +20,9 @@ Mattext is distributed in the hope that it will be useful,
 *******************************************************************************/
 
 #include "animation_fire.h"
+#include "terminal.h"
+#include "config.h"
+#include "file_reader.h"
 
 void FireAnimation::init() {
   fire_heights.resize(terminal_width);

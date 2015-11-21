@@ -24,10 +24,11 @@ Mattext is distributed in the hope that it will be useful,
 #include <list>
 #include <functional>
 #include <ev++.h>
-#include "config.h"
-#include "terminal.h"
 #include "file_reader.h"
 #include "file_io.h"
+
+class Terminal;
+class Config;
 
 class FileStream {
  public:

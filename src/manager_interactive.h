@@ -21,11 +21,12 @@ Mattext is distributed in the hope that it will be useful,
 
 #pragma once
 
-#include "config.h"
-#include "file_stream.h"
-#include "terminal.h"
 #include "animation.h"
 #include "manager.h"
+
+class Config;
+class Terminal;
+class FileStream;
 
 class ManagerInteractive : public Manager {
  public:

@@ -30,6 +30,7 @@ Mattext is distributed in the hope that it will be useful,
 #include <string.h>
 #include <fcntl.h>
 #include "terminal.h"
+#include "config.h"
 
 Terminal::Terminal(const Config &config)
     : colors{COLOR_BLACK, COLOR_RED,     COLOR_GREEN, COLOR_YELLOW,

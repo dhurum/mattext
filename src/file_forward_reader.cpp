@@ -23,6 +23,8 @@ Mattext is distributed in the hope that it will be useful,
 #include <stdexcept>
 #include <string.h>
 #include "file_forward_reader.h"
+#include "config.h"
+#include "file_io.h"
 
 ForwardReader::ForwardReader(std::vector<std::vector<wchar_t>> &lines,
                              std::vector<size_t> &line_lens,
