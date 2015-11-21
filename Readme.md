@@ -10,12 +10,12 @@ Usage: `mattext [options] file1 [file2 ...]` or `cat file | mattext [options]`.
 * `-i`, `--infinite` - At the end of file start reading it from the beginning;
 * `-b`, `--block-lines <lines>` - Block until at least specified number of lines is read, default 1;
 * `-B`, `--block-page` - Block until full page is read;
-* `-c`, `--colorize` - Colorize output (green text on black background);
+* `-N`, `--no-color` - Do not colorize output;
 * `-C`, `--center-horiz` - Center text horizontally;
 * `-L`, `--center-horiz-longest` - Center text horizontally by longest string;
 * `-v`, `--center-vert` - Center text vertically;
 * `-e`, `--without-japanese` - Do not use Japanese symbols;
-* `-a`, `--animation <name>` - Animation for switching pages. Available animations are matrix, reverse_matrix, none;
+* `-a`, `--animation <name>` - Animation for switching pages. Available animations are matrix, reverse_matrix, none, fire;
 * `--animation-next <name>` - Animation for showing next page;
 * `--animation-prev <name>` - Animation for showing previous page;
 
@@ -35,8 +35,8 @@ This will build mattext binary. To test it, you can run `./mattext -c ../mattext
 If you would like to install mattext, you can run `make install`
 
 ###Examples:
-* `mattext -c file` - Show file, colorizing console, one page at a time, and exit at the end;
-* `mattext -cni file` - Show file, colorizing console, until exit key is pressed. When end is reached mattext starts reading it from the beginning;
+* `mattext file` - Show file one page at a time, and exit at the end;
+* `mattext -ni file` - Show file until exit key is pressed. When end is reached mattext starts reading it from the beginning;
 * `tail -f file | mattext -n` - Show file, waiting for at least one new line added to it before redrawing screen;
 * `echo "" | mattext -ni -b 0` - Show animation until quit command key is pressed, similar to cmatrix;
 * `mattext -niLv dir/*` - Show all files from directory dir, centrating text horizontally by longest line and vertically, until exit key is pressed. When mattext reaches the end of the last file it starts reading the first file. This mode can be useful for showing off your ascii art collection;

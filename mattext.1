@@ -13,7 +13,7 @@ mattext \- Simple matrix\-style pager.
 .RB [\| \-b
 .IR lines \|]
 .RB [\| \-B \|]
-.RB [\| \-c \|]
+.RB [\| \-N \|]
 .RB [\| \-C \|]
 .RB [\| \-V \|]
 .RB [\| \-e \|]
@@ -56,8 +56,8 @@ Block until at least specified number of lines is read, default 1.
 .B \-B\fR,\ \fB\-\-block\-page
 Block until full page is read.
 .TP
-.B \-c\fR,\ \fB\-\-colorize
-Colorize output.
+.B \-N\fR,\ \fB\-\-no\-color
+Do not colorize output.
 .TP
 .B \-C\fR,\ \fB\-\-center\-horiz
 Center text horizontally.
@@ -82,11 +82,11 @@ Animation for showing prev page.
 
 .SH EXAMPLES
 .TP
-.B mattext -c file
-Show file, colorizing console, one page at a time, and exit at the end.
+.B mattext file
+Show file one page at a time, and exit at the end.
 .TP
-.B mattext -cni file
-Show file, colorizing console, until exit key is pressed. When end is reached mattext starts reading it from the beginning.
+.B mattext -ni file
+Show file until exit key is pressed. When end is reached mattext starts reading it from the beginning.
 .TP
 .B tail -f file | mattext -n
 Show file, waiting for at least one new line added to it before redrawing screen.
@@ -96,6 +96,16 @@ Show animation until quit command key is pressed, similar to cmatrix.
 .TP
 .B mattext -niLv dir/*
 Show all files from directory dir, centrating text horizontally by longest line and vertically, until exit key is pressed. When mattext reaches the end of the last file it starts reading the first file. This mode can be useful for showing off your ascii art collection.
+
+.SH TROUBLESHOOTING
+.TP
+If you see white squares instead of some symbols, there can be 3 options:
+.TP
+.B 1.\fR Your terminal does not support unicode - you can use another terminal or \fB\-\-without\-japanese\fR option;
+.TP
+.B 2.\fR You do not have any Japanese font - run \fBfc\-list :lang=ja\fR and if this command shows nothing, install some. For example, Droid;
+.TP
+.B 3.\fR Your terminal can't find this font - add it to the terminal's fonts list. For example, urxvt config should look like \fBURxvt.font: xft:Liberation Mono:size=11, xft:Droid Sans Fallback:size=11\fR;
 
 .SH AUTHOR
 Denis Tikhomirov (dvtikhomirov@gmail.com)

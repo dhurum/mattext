@@ -62,6 +62,9 @@ static error_t parseOptions(int key, char *arg, struct argp_state *state) {
     case 'c':
       config->use_colors = true;
       break;
+    case 'N':
+      config->use_colors = false;
+      break;
     case 'C':
       config->center_horiz = true;
       break;
@@ -120,16 +123,17 @@ Config::Config(int argc, char *argv[]) {
        "default " MAKE_STR(DEFAULT_BLOCK_LINES),
        2},
       {"block-page", 'B', NULL, 0, "Block until full page is read", 2},
-      {"colorize", 'c', NULL, 0, "Colorize output", 3},
-      {"center-horiz", 'C', NULL, 0, "Center text horizontally", 3},
+      {"colorize", 'c', NULL, OPTION_HIDDEN, "Colorize output", 3},
+      {"no-color", 'N', NULL, 0, "Do not colorize output", 3},
+      {"center-horiz", 'C', NULL, 0, "Center text horizontally", 4},
       {"center-horiz-longest", 'L', NULL, 0,
-       "Center text horizontally by longest string", 3},
-      {"center-vert", 'v', NULL, 0, "Center text vertically", 3},
-      {"without-japanese", 'e', NULL, 0, "Do not use Japanese symbols", 4},
-      {"animation", 'a', "name", 0, animation_desc.c_str(), 5},
-      {"animation-next", -1, "name", 0, "Animation for showing next page", 5},
+       "Center text horizontally by longest string", 4},
+      {"center-vert", 'v', NULL, 0, "Center text vertically", 4},
+      {"without-japanese", 'e', NULL, 0, "Do not use Japanese symbols", 5},
+      {"animation", 'a', "name", 0, animation_desc.c_str(), 6},
+      {"animation-next", -1, "name", 0, "Animation for showing next page", 6},
       {"animation-prev", -2, "name", 0, "Animation for showing previous page",
-       5},
+       6},
       {0}};
 
   argp argp_opts = {options, parseOptions, "file[, file, ...]"};

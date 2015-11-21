@@ -24,7 +24,7 @@ Mattext is distributed in the hope that it will be useful,
 #include <list>
 #include <string>
 
-#define DEFAULT_DELAY 80
+#define DEFAULT_DELAY 60
 #define DEFAULT_BLOCK_LINES 1
 
 class Config {
@@ -33,7 +33,7 @@ class Config {
   int rand_columns_len = 0;
   int block_lines = DEFAULT_BLOCK_LINES;
   bool noninteract = false;
-  bool use_colors = false;
+  bool use_colors = true;
   bool center_horiz = false;
   bool center_horiz_longest = false;
   bool center_vert = false;
