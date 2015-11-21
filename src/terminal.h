@@ -72,7 +72,7 @@ class Terminal {
   int tty_fd;
   int stdin_fd = STDIN_FILENO;
   mutable ev::io io_watcher;
-  mutable std::function<void(int)> on_key_press;
+  mutable std::vector<std::function<void(int)>> on_key_press;
 
   short getColor(short color) const;
   short getColorPair(short fg, short bg) const;

@@ -84,6 +84,11 @@ Terminal::Terminal(const Config &config)
 
     color_pairs[std::make_pair(default_fg, default_bg)] = 0;
   }
+  onKeyPress([this](int cmd) {
+    if (cmd == KEY_RESIZE) {
+      getmaxyx(stdscr, height, width);
+    }
+  });
 }
 
 Terminal::~Terminal() {
@@ -211,16 +216,19 @@ void Terminal::stop() const {
 }
 
 void Terminal::inputCb(ev::io &w, int revents) {
-  on_key_press(getch());
+  int key = getch();
+  for (auto cb : on_key_press) {
+    cb(key);
+  }
 }
 
 void Terminal::onKeyPress(std::function<void(int)> _on_key_press) const {
   if (!_on_key_press) {
     return;
   }
-  if (!on_key_press) {
+  if (!on_key_press.size()) {
     io_watcher.set<Terminal, &Terminal::inputCb>(const_cast<Terminal *>(this));
     io_watcher.start(tty_fd, ev::READ);
   }
-  on_key_press = _on_key_press;
+  on_key_press.push_back(_on_key_press);
 }

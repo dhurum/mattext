@@ -84,8 +84,6 @@ bool FileStream::nextFile() {
 
 void FileStream::readCb(ev::io &w, int revents) {
   if (!file_reader.read(**current_file)) {
-    size_t block_lines =
-        (config.block_lines < 0) ? terminal.getHeight() : config.block_lines;
     if (file_reader.linesRead() >= block_lines) {
       io_watcher.stop();
       on_read(file_reader);
@@ -122,6 +120,8 @@ void FileStream::read(std::function<void(const Text &text)> _on_read,
   on_read = _on_read;
   on_end = _on_end;
   direction = _direction;
+  block_lines =
+      (config.block_lines < 0) ? terminal.getHeight() : config.block_lines;
 
   (**current_file).newPage(direction);
   file_reader.reset(direction);

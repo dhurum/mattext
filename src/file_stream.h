@@ -51,6 +51,7 @@ class FileStream {
   std::function<void()> on_end;
   FileIO::Direction direction;
   bool end_reached = false;
+  size_t block_lines;
 
   void readCb(ev::io &w, int revents);
   bool nextFile();
