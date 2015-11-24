@@ -48,9 +48,7 @@ FileIO::FileIO(const char *name) : name(name) {
 }
 
 FileIO::FileIO(int stdin_fd)
-    : fd(stdin_fd),
-      name("stdin"),
-      cache(std::make_unique<FileCache>()) {
+    : fd(stdin_fd), name("stdin"), cache(std::make_unique<FileCache>()) {
   int flags = fcntl(fd, F_GETFL, 0);
   if (flags < 0) {
     std::ostringstream err;
@@ -125,7 +123,7 @@ FileIO::Status FileIO::readForward(wchar_t &symbol) {
   mbchar_id = 0;
   return Status::Ok;
 }
-  
+
 FileIO::Status FileIO::readByteBackward(char *byte_ptr) {
   if (cache && cache->readBackward(*byte_ptr)) {
     return Status::Ok;
@@ -138,7 +136,7 @@ FileIO::Status FileIO::readByteBackward(char *byte_ptr) {
     if (lseek(fd, 0, SEEK_CUR)) {
       std::ostringstream err;
       err << "Can't read from file '" << name
-        << "': seek failed: " << strerror(seek_errno);
+          << "': seek failed: " << strerror(seek_errno);
       throw std::runtime_error(err.str());
     }
     return Status::End;
@@ -157,7 +155,7 @@ FileIO::Status FileIO::readByteBackward(char *byte_ptr) {
   if (lseek(fd, -1, SEEK_CUR) == -1) {
     std::ostringstream err;
     err << "Can't read from file '" << name
-      << "': seek failed: " << strerror(errno);
+        << "': seek failed: " << strerror(errno);
     throw std::runtime_error(err.str());
   }
   return Status::Ok;

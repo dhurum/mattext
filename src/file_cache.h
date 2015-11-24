@@ -32,14 +32,14 @@ class FileCache {
   void rewindToStart();
   void rewindToEnd();
   void offsetTo(int offset);
-  
+
  private:
   static const size_t cache_max_len = 1000000;
   std::vector<char> cache;
   size_t start = 0;
   size_t len = 0;
   size_t cur = 0;
-  enum class Reached {Start, End, Ok};
+  enum class Reached { Start, End, Ok };
   Reached status = Reached::End;
 
   static inline void incCounter(size_t &counter);
