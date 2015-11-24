@@ -26,6 +26,7 @@ Mattext is distributed in the hope that it will be useful,
 #include <sys/stat.h>
 #include <unistd.h>
 #include "file_io.h"
+#include "file_cache.h"
 
 FileIO::FileIO(const char *name) : name(name) {
   fd = open(name, O_RDONLY | O_NONBLOCK);
@@ -42,11 +43,14 @@ FileIO::FileIO(const char *name) : name(name) {
     throw std::runtime_error(err.str());
   }
   if (S_ISFIFO(file_stat.st_mode)) {
-    is_pipe = true;
+    cache = std::make_unique<FileCache>();
   }
 }
 
-FileIO::FileIO(int stdin_fd) : fd(stdin_fd), name("stdin"), is_pipe(true) {
+FileIO::FileIO(int stdin_fd)
+    : fd(stdin_fd),
+      name("stdin"),
+      cache(std::make_unique<FileCache>()) {
   int flags = fcntl(fd, F_GETFL, 0);
   if (flags < 0) {
     std::ostringstream err;
@@ -64,6 +68,29 @@ FileIO::~FileIO() {
   close(fd);
 }
 
+FileIO::Status FileIO::readByteForward(char *byte_ptr) {
+  if (cache && cache->readForward(*byte_ptr)) {
+    return Status::Ok;
+  }
+  int ret = ::read(fd, byte_ptr, 1);
+
+  if (!ret) {
+    return Status::End;
+  }
+  if (ret == -1) {
+    if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
+      return Status::WouldBlock;
+    }
+    std::ostringstream err;
+    err << "Can't read from file '" << name << "': " << strerror(errno);
+    throw std::runtime_error(err.str());
+  }
+  if (cache) {
+    cache->addForward(*byte_ptr);
+  }
+  return Status::Ok;
+}
+
 FileIO::Status FileIO::readForward(wchar_t &symbol) {
   mbstate_t mbs;
   symbol = '\0';
@@ -71,23 +98,14 @@ FileIO::Status FileIO::readForward(wchar_t &symbol) {
 
   for (; mbchar_id < mbchar_size; ++mbchar_id) {
     errno = 0;
-    int ret = ::read(fd, mbchar_buf + mbchar_id, 1);
-
-    if (!ret) {
-      if (mbchar_id) {
+    const Status read_res = readByteForward(mbchar_buf + mbchar_id);
+    if (read_res != Status::Ok) {
+      if ((read_res == Status::End) && mbchar_id) {
         mbchar_id = 0;
         symbol = L'\ufffd';
         return Status::Ok;
       }
-      return Status::End;
-    }
-    if (ret == -1) {
-      if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
-        return Status::WouldBlock;
-      }
-      std::ostringstream err;
-      err << "Can't read from file '" << name << "': " << strerror(errno);
-      throw std::runtime_error(err.str());
+      return read_res;
     }
     ++bytes_read;
 
@@ -107,6 +125,43 @@ FileIO::Status FileIO::readForward(wchar_t &symbol) {
   mbchar_id = 0;
   return Status::Ok;
 }
+  
+FileIO::Status FileIO::readByteBackward(char *byte_ptr) {
+  if (cache && cache->readBackward(*byte_ptr)) {
+    return Status::Ok;
+  } else {
+    return Status::End;
+  }
+
+  if (lseek(fd, -1, SEEK_CUR) == -1) {
+    int seek_errno = errno;
+    if (lseek(fd, 0, SEEK_CUR)) {
+      std::ostringstream err;
+      err << "Can't read from file '" << name
+        << "': seek failed: " << strerror(seek_errno);
+      throw std::runtime_error(err.str());
+    }
+    return Status::End;
+  }
+  errno = 0;
+  int ret = ::read(fd, byte_ptr, 1);
+
+  if (ret <= 0) {
+    if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
+      return Status::WouldBlock;
+    }
+    std::ostringstream err;
+    err << "Can't read from file '" << name << "': " << strerror(errno);
+    throw std::runtime_error(err.str());
+  }
+  if (lseek(fd, -1, SEEK_CUR) == -1) {
+    std::ostringstream err;
+    err << "Can't read from file '" << name
+      << "': seek failed: " << strerror(errno);
+    throw std::runtime_error(err.str());
+  }
+  return Status::Ok;
+}
 
 FileIO::Status FileIO::readBackward(wchar_t &symbol) {
   mbstate_t mbs;
@@ -114,39 +169,16 @@ FileIO::Status FileIO::readBackward(wchar_t &symbol) {
   bool symbol_decoded = false;
 
   for (; mbchar_id < mbchar_size; ++mbchar_id) {
-    size_t mbchar_cur_id = mbchar_size - 1 - mbchar_id;
+    const size_t mbchar_cur_id = mbchar_size - 1 - mbchar_id;
+    const Status read_res = readByteBackward(mbchar_buf + mbchar_cur_id);
 
-    if (lseek(fd, -1, SEEK_CUR) == -1) {
-      int seek_errno = errno;
-      if (lseek(fd, 0, SEEK_CUR)) {
-        std::ostringstream err;
-        err << "Can't read from file '" << name
-            << "': seek failed: " << strerror(seek_errno);
-        throw std::runtime_error(err.str());
-      }
-      if (mbchar_id) {
+    if (read_res != Status::Ok) {
+      if ((read_res == Status::End) && mbchar_id) {
         mbchar_id = 0;
         symbol = L'\ufffd';
         return Status::Ok;
       }
-      return Status::End;
-    }
-    errno = 0;
-    int ret = ::read(fd, mbchar_buf + mbchar_cur_id, 1);
-
-    if (ret <= 0) {
-      if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
-        return Status::WouldBlock;
-      }
-      std::ostringstream err;
-      err << "Can't read from file '" << name << "': " << strerror(errno);
-      throw std::runtime_error(err.str());
-    }
-    if (lseek(fd, -1, SEEK_CUR) == -1) {
-      std::ostringstream err;
-      err << "Can't read from file '" << name
-          << "': seek failed: " << strerror(errno);
-      throw std::runtime_error(err.str());
+      return read_res;
     }
     ++bytes_read;
 
@@ -170,12 +202,20 @@ void FileIO::stop() {
 }
 
 void FileIO::newPage(Direction _direction) {
-  if (!active && (started || (_direction == Direction::Backward)) && !is_pipe) {
+  if (!active && (started || (_direction == Direction::Backward))) {
     int ret = 0;
     if (_direction == Direction::Forward) {
-      ret = lseek(fd, 0, SEEK_SET);
+      if (cache) {
+        cache->rewindToStart();
+      } else {
+        ret = lseek(fd, 0, SEEK_SET);
+      }
     } else {
-      ret = lseek(fd, 0, SEEK_END);
+      if (cache) {
+        cache->rewindToEnd();
+      } else {
+        ret = lseek(fd, 0, SEEK_END);
+      }
     }
     if (ret == -1) {
       std::ostringstream err;
@@ -183,7 +223,7 @@ void FileIO::newPage(Direction _direction) {
       throw std::runtime_error(err.str());
     }
   }
-  if (active && (direction != _direction) && !is_pipe) {
+  if (active && (direction != _direction)) {
     if (!bytes_read && prev_bytes_read) {
       bytes_read = prev_bytes_read;
     }
@@ -191,10 +231,14 @@ void FileIO::newPage(Direction _direction) {
     if (direction == Direction::Forward) {
       offset *= -1;
     }
-    if (offset && (lseek(fd, offset, SEEK_CUR) == -1)) {
-      std::ostringstream err;
-      err << "Can' seek in file '" << name << "': " << strerror(errno);
-      throw std::runtime_error(err.str());
+    if (offset) {
+      if (cache) {
+        cache->offsetTo(offset);
+      } else if (lseek(fd, offset, SEEK_CUR) == -1) {
+        std::ostringstream err;
+        err << "Can' seek in file '" << name << "': " << strerror(errno);
+        throw std::runtime_error(err.str());
+      }
     }
   }
   direction = _direction;
@@ -208,13 +252,18 @@ FileIO::Status FileIO::read(wchar_t &symbol) {
   if (direction == Direction::Forward) {
     return readForward(symbol);
   }
-  if (is_pipe) {
-    return Status::End;
-  }
   return readBackward(symbol);
 }
 
 void FileIO::unread() {
+  if (cache) {
+    if (direction == Direction::Forward) {
+      cache->offsetTo(-1);
+    } else {
+      cache->offsetTo(1);
+    }
+    return;
+  }
   int offset = 1;
   if (direction == Direction::Forward) {
     offset = -1;

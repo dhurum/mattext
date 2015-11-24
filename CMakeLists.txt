@@ -99,6 +99,7 @@ string(REPLACE ";" " " CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
 set(${TARGET}_SRCS
   src/config.cpp
   src/file_io.cpp
+  src/file_cache.cpp
   src/file_stream.cpp
   src/file_reader.cpp
   src/file_forward_reader.cpp

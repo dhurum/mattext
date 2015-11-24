@@ -21,39 +21,28 @@ Mattext is distributed in the hope that it will be useful,
 
 #pragma once
 
-#include <memory>
+#include <vector>
+#include <stddef.h>
 
-class FileCache;
-
-static const size_t mbchar_size = 4;
-
-class FileIO {
+class FileCache {
  public:
-  enum class Direction { Forward, Backward };
-  enum class Status { Ok, End, WouldBlock };
-  FileIO(const char *name);
-  FileIO(int stdin_fd);
-  ~FileIO();
-  void stop();
-  void newPage(Direction direction);
-  Status read(wchar_t &symbol);
-  void unread();
-  int fno();
-
+  void addForward(char byte);
+  bool readForward(char &byte);
+  bool readBackward(char &byte);
+  void rewindToStart();
+  void rewindToEnd();
+  void offsetTo(int offset);
+  
  private:
-  int fd;
-  const char *name;
-  char mbchar_buf[mbchar_size];
-  size_t mbchar_id = 0;
-  Direction direction = Direction::Forward;
-  size_t bytes_read = 0;
-  size_t prev_bytes_read = 0;
-  bool started = false;
-  bool active = false;
-  std::unique_ptr<FileCache> cache;
+  static const size_t cache_max_len = 1000000;
+  std::vector<char> cache;
+  size_t start = 0;
+  size_t len = 0;
+  size_t cur = 0;
+  enum class Reached {Start, End, Ok};
+  Reached status = Reached::End;
 
-  Status readByteForward(char *byte_ptr);
-  Status readForward(wchar_t &symbol);
-  Status readByteBackward(char *byte_ptr);
-  Status readBackward(wchar_t &symbol);
+  static inline void incCounter(size_t &counter);
+  static inline void decCounter(size_t &counter);
+  inline size_t getEnd();
 };
