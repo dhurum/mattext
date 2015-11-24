@@ -21,36 +21,4 @@ Mattext is distributed in the hope that it will be useful,
 
 #pragma once
 
-#include <vector>
-#include <memory>
-#include "direction.h"
-
-class Terminal;
-class Config;
-class FileReaderLogic;
-class FileIO;
-
-class Text {
- public:
-  virtual wchar_t get(size_t column, size_t row) const = 0;
-  virtual std::wstring getLine() const = 0;
-};
-
-class FileReader : public Text {
- public:
-  FileReader(const Config &config, const Terminal &terminal);
-  ~FileReader();
-  void reset(Direction direction);
-  bool read(FileIO &f);
-  size_t linesRead() const;
-  wchar_t get(size_t column, size_t row) const override;
-  std::wstring getLine() const override;
-
- private:
-  const Terminal &terminal;
-  std::vector<std::vector<wchar_t>> lines;
-  std::vector<size_t> line_lens;
-  std::unique_ptr<FileReaderLogic> forward_reader;
-  std::unique_ptr<FileReaderLogic> backward_reader;
-  FileReaderLogic *reader;
-};
+enum class Direction { Forward, Backward };

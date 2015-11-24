@@ -21,24 +21,27 @@ Mattext is distributed in the hope that it will be useful,
 
 #pragma once
 
-#include "animation.h"
+#include <memory>
 #include "manager.h"
 
 class Config;
 class Terminal;
 class FileStream;
+class Animation;
+class AnimationStore;
 
 class ManagerInteractive : public Manager {
  public:
   ManagerInteractive(const Config &config, FileStream &file_stream,
                      const Terminal &terminal);
+  ~ManagerInteractive();
   void checkPending();
 
  private:
   const Config &config;
   FileStream &file_stream;
   const Terminal &terminal;
-  AnimationStore animations;
+  std::unique_ptr<AnimationStore> animations;
   Animation *animation_next;
   Animation *animation_prev;
   Animation *current_animation;

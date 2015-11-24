@@ -22,8 +22,10 @@ Mattext is distributed in the hope that it will be useful,
 #include "file_reader.h"
 #include "file_forward_reader.h"
 #include "file_backward_reader.h"
+#include "file_reader_logic.h"
 #include "config.h"
 #include "terminal.h"
+#include "file_io.h"
 
 FileReader::FileReader(const Config &config, const Terminal &terminal)
     : terminal(terminal),
@@ -31,7 +33,9 @@ FileReader::FileReader(const Config &config, const Terminal &terminal)
       backward_reader(
           std::make_unique<BackwardReader>(lines, line_lens, config)) {}
 
-void FileReader::reset(FileIO::Direction direction) {
+FileReader::~FileReader() = default;
+
+void FileReader::reset(Direction direction) {
   bool resized = false;
   size_t line_len = terminal.getWidth();
   size_t lines_num = terminal.getHeight();
@@ -51,7 +55,7 @@ void FileReader::reset(FileIO::Direction direction) {
     line_len = 0;
   }
 
-  if (direction == FileIO::Direction::Forward) {
+  if (direction == Direction::Forward) {
     reader = forward_reader.get();
   } else {
     reader = backward_reader.get();

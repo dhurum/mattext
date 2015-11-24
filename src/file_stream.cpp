@@ -26,9 +26,13 @@ Mattext is distributed in the hope that it will be useful,
 #include "file_stream.h"
 #include "config.h"
 #include "terminal.h"
+#include "file_reader.h"
+#include "file_io.h"
 
 FileStream::FileStream(const Config &config, const Terminal &terminal)
-    : config(config), terminal(terminal), file_reader(config, terminal) {
+    : config(config),
+      terminal(terminal),
+      file_reader(std::make_unique<FileReader>(config, terminal)) {
   for (auto name : config.files) {
     files.push_back(std::make_unique<FileIO>(name));
   }
@@ -52,7 +56,7 @@ FileStream::~FileStream() {
 bool FileStream::nextFile() {
   auto prev_file = current_file;
 
-  if (direction == FileIO::Direction::Forward) {
+  if (direction == Direction::Forward) {
     ++current_file;
     if (current_file != files.end()) {
       (**prev_file).stop();
@@ -70,7 +74,7 @@ bool FileStream::nextFile() {
     return false;
   }
 
-  if (direction == FileIO::Direction::Forward) {
+  if (direction == Direction::Forward) {
     current_file = files.begin();
   } else {
     current_file = files.end();
@@ -83,17 +87,17 @@ bool FileStream::nextFile() {
 }
 
 void FileStream::readCb(ev::io &w, int revents) {
-  if (!file_reader.read(**current_file)) {
-    if (file_reader.linesRead() >= block_lines) {
+  if (!file_reader->read(**current_file)) {
+    if (file_reader->linesRead() >= block_lines) {
       io_watcher.stop();
-      on_read(file_reader);
+      on_read(*file_reader);
     }
     return;
   }
 
   io_watcher.stop();
-  if (file_reader.linesRead()) {
-    on_read(file_reader);
+  if (file_reader->linesRead()) {
+    on_read(*file_reader);
   } else if (nextFile()) {
     io_watcher.start((**current_file).fno(), ev::READ);
   } else if (on_end) {
@@ -106,12 +110,11 @@ void FileStream::stop() {
 }
 
 void FileStream::read(std::function<void(const Text &text)> _on_read,
-                      std::function<void()> _on_end,
-                      FileIO::Direction _direction) {
+                      std::function<void()> _on_end, Direction _direction) {
   if (end_reached) {
     if (_direction == direction) {
       return;
-    } else if (_direction == FileIO::Direction::Backward) {
+    } else if (_direction == Direction::Backward) {
       --current_file;
     }
   }
@@ -124,7 +127,7 @@ void FileStream::read(std::function<void(const Text &text)> _on_read,
       (config.block_lines < 0) ? terminal.getHeight() : config.block_lines;
 
   (**current_file).newPage(direction);
-  file_reader.reset(direction);
+  file_reader->reset(direction);
 
   io_watcher.set<FileStream, &FileStream::readCb>(this);
   io_watcher.start((**current_file).fno(), ev::READ);

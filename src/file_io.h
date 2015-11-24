@@ -22,6 +22,7 @@ Mattext is distributed in the hope that it will be useful,
 #pragma once
 
 #include <memory>
+#include "direction.h"
 
 class FileCache;
 
@@ -29,7 +30,6 @@ static const size_t mbchar_size = 4;
 
 class FileIO {
  public:
-  enum class Direction { Forward, Backward };
   enum class Status { Ok, End, WouldBlock };
   FileIO(const char *name);
   FileIO(int stdin_fd);

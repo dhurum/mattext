@@ -28,6 +28,8 @@ Mattext is distributed in the hope that it will be useful,
 #include "config.h"
 #include "file_stream.h"
 #include "terminal.h"
+#include "direction.h"
+#include "animation.h"
 
 ManagerInteractive::ManagerInteractive(const Config &config,
                                        FileStream &file_stream,
@@ -35,15 +37,17 @@ ManagerInteractive::ManagerInteractive(const Config &config,
     : config(config),
       file_stream(file_stream),
       terminal(terminal),
-      animations(config, terminal) {
+      animations(std::make_unique<AnimationStore>(config, terminal)) {
   terminal.onKeyPress([this](int cmd) { this->inputCb(cmd); });
 
-  animation_next = animations.get(config.animation_next);
-  animation_prev = animations.get(config.animation_prev);
+  animation_next = animations->get(config.animation_next);
+  animation_prev = animations->get(config.animation_prev);
   current_animation = animation_next;
 
   getNextPage();
 }
+
+ManagerInteractive::~ManagerInteractive() = default;
 
 void ManagerInteractive::inputCb(int cmd) {
   switch (cmd) {
@@ -103,7 +107,7 @@ void ManagerInteractive::getPrevPage() {
   current_animation = animation_prev;
   file_stream.read([this](const Text &text) {
     this->current_animation->play(text, [this]() { this->checkPending(); });
-  }, nullptr, FileIO::Direction::Backward);
+  }, nullptr, Direction::Backward);
 }
 
 void ManagerInteractive::quit() {

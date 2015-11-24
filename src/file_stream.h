@@ -23,12 +23,15 @@ Mattext is distributed in the hope that it will be useful,
 
 #include <list>
 #include <functional>
+#include <memory>
 #include <ev++.h>
-#include "file_reader.h"
-#include "file_io.h"
+#include "direction.h"
 
 class Terminal;
 class Config;
+class FileIO;
+class FileReader;
+class Text;
 
 class FileStream {
  public:
@@ -37,19 +40,19 @@ class FileStream {
   void stop();
   void read(std::function<void(const Text &text)> on_read,
             std::function<void()> on_end,
-            FileIO::Direction direction = FileIO::Direction::Forward);
+            Direction direction = Direction::Forward);
 
  private:
   const Config &config;
   const Terminal &terminal;
-  FileReader file_reader;
+  std::unique_ptr<FileReader> file_reader;
   using FileList = std::list<std::unique_ptr<FileIO>>;
   FileList files;
   FileList::iterator current_file;
   ev::io io_watcher;
   std::function<void(const Text &text)> on_read;
   std::function<void()> on_end;
-  FileIO::Direction direction;
+  Direction direction;
   bool end_reached = false;
   size_t block_lines;
 
