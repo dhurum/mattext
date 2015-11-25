@@ -125,9 +125,10 @@ FileIO::Status FileIO::readForward(wchar_t &symbol) {
 }
 
 FileIO::Status FileIO::readByteBackward(char *byte_ptr) {
-  if (cache && cache->readBackward(*byte_ptr)) {
-    return Status::Ok;
-  } else {
+  if (cache) {
+    if (cache->readBackward(*byte_ptr)) {
+      return Status::Ok;
+    }
     return Status::End;
   }
 
