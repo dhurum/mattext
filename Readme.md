@@ -4,7 +4,7 @@ Mattext shows text with matrix-style rain-of-symbols animation during page chang
 Usage: `mattext [options] file1 [file2 ...]` or `cat file | mattext [options]`.
 
 ###Options:
-* `-d`, `--delay <delay>` - Delay between screen redraws, in milliseconds, default 80;
+* `-d`, `--delay <delay>` - Delay between screen redraws, in milliseconds, default 60;
 * `-l`, `--rand-len <length>` - Maximum length of random symbols columns;
 * `-n`, `--non-interact` - Do not wait for user input before showing next page;
 * `-i`, `--infinite` - At the end of file start reading it from the beginning;
