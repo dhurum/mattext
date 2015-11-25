@@ -166,7 +166,7 @@ wchar_t BackwardReader::get(size_t _column, size_t _row) const {
     return L' ';
   }
 
-  if (lines[row][column] == '\n') {
+  if ((lines[row][column] == '\n') || (lines[row][column] == '\r')) {
     return L' ';
   }
 
