@@ -86,15 +86,16 @@ bool ForwardReader::readLine(FileIO &f) {
     }
     ++cur_symbol_id;
 
-    if (cur_symbol == '\n') {
-      lines[current_line_id][cur_symbol_id] = '\0';
-      return true;
-    } else if (cur_symbol_id == line_max_len) {
-      f.unread();
-      --cur_symbol_id;
-      cur_symbol = '\0';
-      return true;
+    if ((cur_symbol != '\n') && (cur_symbol_id < line_max_len)) {
+      continue;
     }
+
+    if (cur_symbol != '\n') {
+      f.unread();
+      cur_symbol = '\n';
+    }
+    lines[current_line_id][cur_symbol_id] = '\0';
+    return true;
   }
 }
 
@@ -147,9 +148,6 @@ std::wstring ForwardReader::getLine() const {
   }
 
   str.append(lines[current_out_line_id].data());
-  if (lines[current_out_line_id][line_lens[current_out_line_id]] != '\n') {
-    str.append(L"\n");
-  }
   ++current_out_line_id;
 
   return str;

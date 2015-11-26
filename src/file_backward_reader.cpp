@@ -87,12 +87,20 @@ bool BackwardReader::processCache() {
         && (cache[cache_end - 1] == '\n')) {
       ++copy_len;
     }
+    size_t line_len = copy_len;
     memcpy(lines[current_line].data(), cache.data() + start,
            copy_len * mbchar_size);
-    line_lens[current_line] = copy_len;
-    lines[current_line][copy_len] = '\0';
-    if (longest_line_len < copy_len) {
-      longest_line_len = copy_len;
+
+    if (lines[current_line][copy_len - 1] != '\n') {
+      lines[current_line][copy_len] = '\n';
+      lines[current_line][copy_len + 1] = '\0';
+    } else {
+      --line_len;
+      lines[current_line][copy_len] = '\0';
+    }
+    line_lens[current_line] = line_len;
+    if (longest_line_len < line_len) {
+      longest_line_len = line_len;
     }
     current_out_line_id = current_line;
     ++current_line;
@@ -192,9 +200,6 @@ std::wstring BackwardReader::getLine() const {
   }
 
   str.append(lines[current_out_line_id].data());
-  if (lines[current_out_line_id][line_lens[current_out_line_id]] != '\n') {
-    str.append(L"\n");
-  }
   ++current_out_line_id;
 
   return str;
