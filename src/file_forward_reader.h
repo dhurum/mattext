@@ -30,7 +30,8 @@ class ForwardReader : public FileReaderLogic {
  public:
   ForwardReader(std::vector<std::vector<wchar_t>> &lines,
                 std::vector<size_t> &line_lens, const Config &config);
-  void reset() override;
+  void newPage() override;
+  void directionChanged() override;
   bool read(FileIO &f) override;
   size_t linesRead() const override;
   wchar_t get(size_t column, size_t row) const override;
@@ -43,6 +44,7 @@ class ForwardReader : public FileReaderLogic {
   size_t current_line_id;
   size_t longest_line_len;
   mutable size_t current_out_line_id;
+  size_t remaining_spaces = 0;
 
   bool readLine(FileIO &f);
 };

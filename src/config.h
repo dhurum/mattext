@@ -26,6 +26,7 @@ Mattext is distributed in the hope that it will be useful,
 
 #define DEFAULT_DELAY 60
 #define DEFAULT_BLOCK_LINES 1
+#define DEFAULT_TAB_WIDTH 4
 
 class Config {
  public:
@@ -42,6 +43,7 @@ class Config {
   std::list<const char *> files;
   std::string animation_next{"matrix"};
   std::string animation_prev{"reverse_matrix"};
+  int tab_width = DEFAULT_TAB_WIDTH;
 
   Config(int argc, char *argv[]);
 };

@@ -31,7 +31,7 @@ BackwardReader::BackwardReader(std::vector<std::vector<wchar_t>> &lines,
                                const Config &config)
     : lines(lines), line_lens(line_lens), config(config) {}
 
-void BackwardReader::reset() {
+void BackwardReader::newPage() {
   // cache size should be equal to longest possible string
   const size_t cache_size = lines.size() * (lines[0].size() - 2) + 1;
   if (cache.size() != cache_size) {
@@ -41,6 +41,11 @@ void BackwardReader::reset() {
   lines_read = 0;
   longest_line_len = 0;
   first_page = false;
+  line_has_nl = false;
+}
+
+void BackwardReader::directionChanged() {
+  remaining_spaces = 0;
 }
 
 bool BackwardReader::read(FileIO &f) {
@@ -48,7 +53,7 @@ bool BackwardReader::read(FileIO &f) {
     return true;
   }
   while (true) {
-    if (!readLine(f)) {
+    if (!fillCache(f)) {
       return false;
     }
     if (!cache_len) {
@@ -117,14 +122,21 @@ bool BackwardReader::processCache() {
   return false;
 }
 
-bool BackwardReader::readLine(FileIO &f) {
+bool BackwardReader::fillCache(FileIO &f) {
   if (cache_len == cache.size()) {
     return true;
   }
 
   while (true) {
     auto &cur_symbol = cache[cache.size() - 1 - cache_len];
-    FileIO::Status ret = f.read(cur_symbol);
+    FileIO::Status ret = FileIO::Status::Ok;
+
+    if (remaining_spaces) {
+      cur_symbol = ' ';
+      --remaining_spaces;
+    } else {
+      ret = f.read(cur_symbol);
+    }
     if (ret == FileIO::Status::WouldBlock) {
       return false;
     } else if (ret == FileIO::Status::End) {
@@ -132,14 +144,23 @@ bool BackwardReader::readLine(FileIO &f) {
       return true;
     }
 
-    if ((cur_symbol == '\n') && line_started) {
-      f.unread();
-      line_started = false;
-      return true;
+    if (cur_symbol == '\n') {
+      if (line_started) {
+        f.unread();
+        line_started = false;
+        return true;
+      } else {
+        line_has_nl = true;
+      }
     }
     ++cache_len;
     line_started = true;
-    if (cache_len == cache.size()) {
+    if (cur_symbol == '\t') {
+      cur_symbol = ' ';
+      remaining_spaces = config.tab_width - 1;
+    }
+    if ((!line_has_nl && (cache_len == (cache.size() - 1)))
+        || (cache_len == cache.size())) {
       return true;
     }
   }

@@ -99,6 +99,11 @@ static error_t parseOptions(int key, char *arg, struct argp_state *state) {
     case -2:
       config->animation_prev = arg;
       break;
+    case 't':
+      if (!getIntArg(config->tab_width, arg) || (config->tab_width < 1)) {
+        return ARGP_ERR_UNKNOWN;
+      }
+      break;
     default:
       break;
   }
@@ -134,6 +139,8 @@ Config::Config(int argc, char *argv[]) {
       {"animation-next", -1, "name", 0, "Animation for showing next page", 6},
       {"animation-prev", -2, "name", 0, "Animation for showing previous page",
        6},
+      {"tab-width", 't', "width", 0,
+       "Tab width, minimum 1, default " MAKE_STR(DEFAULT_TAB_WIDTH), 7},
       {0}};
 
   argp argp_opts = {options, parseOptions, "file[, file, ...]"};

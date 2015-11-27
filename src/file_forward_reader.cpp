@@ -31,10 +31,14 @@ ForwardReader::ForwardReader(std::vector<std::vector<wchar_t>> &lines,
                              const Config &config)
     : lines(lines), line_lens(line_lens), config(config) {}
 
-void ForwardReader::reset() {
+void ForwardReader::newPage() {
   current_line_id = 0;
   longest_line_len = 0;
   current_out_line_id = 0;
+}
+
+void ForwardReader::directionChanged() {
+  remaining_spaces = 0;
 }
 
 bool ForwardReader::read(FileIO &f) {
@@ -78,7 +82,16 @@ bool ForwardReader::readLine(FileIO &f) {
 
   while (true) {
     auto &cur_symbol = lines[current_line_id][cur_symbol_id];
-    FileIO::Status ret = f.read(cur_symbol);
+    FileIO::Status ret = FileIO::Status::Ok;
+    bool file_read = false;
+
+    if (remaining_spaces) {
+      cur_symbol = ' ';
+      --remaining_spaces;
+    } else {
+      ret = f.read(cur_symbol);
+      file_read = true;
+    }
     if (ret == FileIO::Status::WouldBlock) {
       return false;
     } else if (ret == FileIO::Status::End) {
@@ -86,12 +99,21 @@ bool ForwardReader::readLine(FileIO &f) {
     }
     ++cur_symbol_id;
 
+    if ((cur_symbol == '\t') && (cur_symbol_id < line_max_len)) {
+      cur_symbol = ' ';
+      remaining_spaces = config.tab_width - 1;
+    }
+
     if ((cur_symbol != '\n') && (cur_symbol_id < line_max_len)) {
       continue;
     }
 
     if (cur_symbol != '\n') {
-      f.unread();
+      if (file_read) {
+        f.unread();
+      } else {
+        ++remaining_spaces;
+      }
       cur_symbol = '\n';
     }
     lines[current_line_id][cur_symbol_id] = '\0';

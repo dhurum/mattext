@@ -18,6 +18,7 @@ Usage: `mattext [options] file1 [file2 ...]` or `cat file | mattext [options]`.
 * `-a`, `--animation <name>` - Animation for switching pages. Available animations are matrix, reverse_matrix, none, fire;
 * `--animation-next <name>` - Animation for showing next page;
 * `--animation-prev <name>` - Animation for showing previous page;
+* `-t`, `--tab-width <width>` - Tab width, minimum 1, default 4;
 
 ###Commands:
 * <kbd>q</kbd>, <kbd>ctrl + D</kbd> - Exit program;

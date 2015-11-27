@@ -35,7 +35,7 @@ FileReader::FileReader(const Config &config, const Terminal &terminal)
 
 FileReader::~FileReader() = default;
 
-void FileReader::reset(Direction direction) {
+void FileReader::newPage(Direction _direction) {
   bool resized = false;
   size_t line_len = terminal.getWidth();
   size_t lines_num = terminal.getHeight();
@@ -54,13 +54,16 @@ void FileReader::reset(Direction direction) {
   for (auto &line_len : line_lens) {
     line_len = 0;
   }
-
+  if ((direction != _direction) && reader) {
+    reader->directionChanged();
+  }
+  direction = _direction;
   if (direction == Direction::Forward) {
     reader = forward_reader.get();
   } else {
     reader = backward_reader.get();
   }
-  reader->reset();
+  reader->newPage();
 }
 
 bool FileReader::read(FileIO &f) {

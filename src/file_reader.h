@@ -40,7 +40,7 @@ class FileReader : public Text {
  public:
   FileReader(const Config &config, const Terminal &terminal);
   ~FileReader();
-  void reset(Direction direction);
+  void newPage(Direction direction);
   bool read(FileIO &f);
   size_t linesRead() const;
   wchar_t get(size_t column, size_t row) const override;
@@ -52,5 +52,6 @@ class FileReader : public Text {
   std::vector<size_t> line_lens;
   std::unique_ptr<FileReaderLogic> forward_reader;
   std::unique_ptr<FileReaderLogic> backward_reader;
-  FileReaderLogic *reader;
+  FileReaderLogic *reader = nullptr;
+  Direction direction = Direction::Forward;
 };

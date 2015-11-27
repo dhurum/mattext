@@ -30,7 +30,8 @@ class BackwardReader : public FileReaderLogic {
  public:
   BackwardReader(std::vector<std::vector<wchar_t>> &lines,
                  std::vector<size_t> &line_lens, const Config &config);
-  void reset() override;
+  void newPage() override;
+  void directionChanged() override;
   bool read(FileIO &f) override;
   size_t linesRead() const override;
   wchar_t get(size_t column, size_t row) const override;
@@ -44,11 +45,13 @@ class BackwardReader : public FileReaderLogic {
   size_t cache_len = 0;
   size_t cache_start;
   bool line_started;
+  bool line_has_nl;
   size_t lines_read;
   mutable size_t current_out_line_id;
   size_t longest_line_len;
   bool first_page;
+  size_t remaining_spaces = 0;
 
-  bool readLine(FileIO &f);
+  bool fillCache(FileIO &f);
   bool processCache();
 };

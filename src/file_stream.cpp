@@ -127,7 +127,7 @@ void FileStream::read(std::function<void(const Text &text)> _on_read,
       (config.block_lines < 0) ? terminal.getHeight() : config.block_lines;
 
   (**current_file).newPage(direction);
-  file_reader->reset(direction);
+  file_reader->newPage(direction);
 
   io_watcher.set<FileStream, &FileStream::readCb>(this);
   io_watcher.start((**current_file).fno(), ev::READ);
