@@ -155,9 +155,12 @@ short Terminal::getColorPair(short fg, short bg) const {
   return color_pair;
 }
 
-void Terminal::set(size_t column, size_t row, wchar_t symbol, bool bold,
+void Terminal::set(int column, int row, wchar_t symbol, bool bold,
                    short fg, short bg) const {
   assert(stdout_is_tty);
+  if ((column < 0) || (column >= width) || (row < 0) || (row >= height)) {
+    return;
+  }
   wchar_t str[] = {symbol, L'\0'};
   cchar_t cchar;
   attr_t attr = bold ? A_BOLD : A_NORMAL;
@@ -171,7 +174,7 @@ void Terminal::set(size_t column, size_t row, wchar_t symbol, bool bold,
   mvadd_wch(row, column, &cchar);
 }
 
-wchar_t Terminal::get(size_t column, size_t row) const {
+wchar_t Terminal::get(int column, int row) const {
   assert(stdout_is_tty);
   cchar_t cchar;
 

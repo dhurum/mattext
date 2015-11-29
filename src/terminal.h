@@ -49,9 +49,9 @@ class Terminal {
   size_t getHeight() const;
   bool stdoutIsTty() const;
   bool stdinIsTty() const;
-  void set(size_t column, size_t row, wchar_t symbol, bool bold = false,
+  void set(int column, int row, wchar_t symbol, bool bold = false,
            short fg = ColorDefault, short bg = ColorDefault) const;
-  wchar_t get(size_t column, size_t row) const;
+  wchar_t get(int column, int row) const;
   void setColors(short fg, short bg) const;
   void show() const;
   void clear() const;
@@ -60,8 +60,8 @@ class Terminal {
   void stop() const;
 
  private:
-  size_t width;
-  size_t height;
+  int width;
+  int height;
   bool stdout_is_tty = true;
   bool stdin_is_tty = true;
   bool use_colors = false;
