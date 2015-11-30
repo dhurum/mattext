@@ -15,7 +15,7 @@ Usage: `mattext [options] file1 [file2 ...]` or `cat file | mattext [options]`.
 * `-L`, `--center-horiz-longest` - Center text horizontally by longest string;
 * `-v`, `--center-vert` - Center text vertically;
 * `-e`, `--without-japanese` - Do not use Japanese symbols;
-* `-a`, `--animation <name>` - Animation for switching pages. Available animations are matrix, reverse_matrix, none, fire;
+* `-a`, `--animation <name>` - Animation for switching pages. Available animations are matrix, reverse_matrix, none, fire, beam;
 * `--animation-next <name>` - Animation for showing next page;
 * `--animation-prev <name>` - Animation for showing previous page;
 * `-t`, `--tab-width <width>` - Tab width, minimum 1, default 4;

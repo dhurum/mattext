@@ -36,7 +36,7 @@ void MatrixAnimation::init() {
   }
 
   // Random symbols are organized into columns
-  for (size_t i = 0; i < terminal_width; ++i) {
+  for (int i = 0; i < terminal_width; ++i) {
     col_lengths[i] = 1 + rand() % max_col_length;
     col_offsets[i] = rand() % max_col_length;
   }
@@ -48,7 +48,7 @@ void MatrixAnimation::tick(ev::timer &w, int revents) {
   int _terminal_height = static_cast<int>(terminal_height);
   bool stopped = true;
 
-  for (size_t col = 0; col < terminal_width; ++col) {
+  for (int col = 0; col < terminal_width; ++col) {
     int col_start = tick_id - col_offsets[col];
     int col_end = col_start - col_lengths[col];
     int text_start = col_end - tail_length - 1;

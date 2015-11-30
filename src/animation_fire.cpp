@@ -72,7 +72,7 @@ void FireAnimation::tick(ev::timer &w, int revents) {
   size_t prev = fire_heights[0];
   size_t prev_end = fire_end_heights[0];
 
-  for (size_t col = 0; col < terminal_width; ++col) {
+  for (int col = 0; col < terminal_width; ++col) {
     auto &height = fire_heights[col];
     int fire_start = terminal_height - 1 - tick_id - height + max_fire_height;
     auto &end_height = fire_end_heights[col];

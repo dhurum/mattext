@@ -21,31 +21,26 @@ Mattext is distributed in the hope that it will be useful,
 
 #pragma once
 
-#include <functional>
-#include "animation.h"
+#include <vector>
+#include "animation_generic.h"
 
-class GenericAnimation : public Animation {
+class BeamAnimation : public GenericAnimation {
  public:
-  GenericAnimation(const Config &config, const Terminal &terminal);
-  void play(const Text &text, std::function<void()> on_stop) override;
-  void stop() override;
-  bool isPlaying() override;
+  using GenericAnimation::GenericAnimation;
 
- protected:
-  const Config &config;
-  const Terminal &terminal;
-  const Text *text;
-  ev::timer timer_watcher;
-  bool is_playing = false;
-  int terminal_width;
-  int terminal_height;
-  std::function<void()> on_stop;
+ private:
+  int tick_id;
+  bool showing_flash;
+  bool showing_beam;
+  bool showing_text;
+  int flash_max_radius;
+  int flash_radius;
+  short flash_color;
+  int beam_height;
+  int beam_step;
+  std::vector<std::pair<int, int>> text_edges;
+  std::function<wchar_t(int, int)> text_show_cb;
 
-  virtual void init() = 0;
-  virtual void tick(ev::timer &w, int revents) = 0;
-
-  void drawCircle(int radius, int center_x, int center_y, bool bold,
-                  short color);
-  void drawLine(int x1, int y1, int x2, int y2, short color,
-                std::function<wchar_t(int, int)> callback = nullptr);
+  void init() override;
+  virtual void tick(ev::timer &w, int revents) override;
 };

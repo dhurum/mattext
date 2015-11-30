@@ -26,6 +26,7 @@ Mattext is distributed in the hope that it will be useful,
 #include "animation_reverse_matrix.h"
 #include "animation_none.h"
 #include "animation_fire.h"
+#include "animation_beam.h"
 
 struct AnimationInfo {
   std::string name;
@@ -48,6 +49,9 @@ static std::list<AnimationInfo> animation_info{
      }},
     {"fire", [](const Config &config, const Terminal &terminal) {
        return std::make_unique<FireAnimation>(config, terminal);
+     }},
+    {"beam", [](const Config &config, const Terminal &terminal) {
+       return std::make_unique<BeamAnimation>(config, terminal);
      }}};
 
 AnimationStore::AnimationStore(const Config &config, const Terminal &terminal) {
