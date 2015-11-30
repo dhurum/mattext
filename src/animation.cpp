@@ -47,7 +47,8 @@ static std::list<AnimationInfo> animation_info{
      [](const Config &config, const Terminal &terminal) {
        return std::make_unique<NoneAnimation>(terminal);
      }},
-    {"fire", [](const Config &config, const Terminal &terminal) {
+    {"fire",
+     [](const Config &config, const Terminal &terminal) {
        return std::make_unique<FireAnimation>(config, terminal);
      }},
     {"beam", [](const Config &config, const Terminal &terminal) {

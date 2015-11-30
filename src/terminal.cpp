@@ -155,8 +155,8 @@ short Terminal::getColorPair(short fg, short bg) const {
   return color_pair;
 }
 
-void Terminal::set(int column, int row, wchar_t symbol, bool bold,
-                   short fg, short bg) const {
+void Terminal::set(int column, int row, wchar_t symbol, bool bold, short fg,
+                   short bg) const {
   assert(stdout_is_tty);
   if ((column < 0) || (column >= width) || (row < 0) || (row >= height)) {
     return;

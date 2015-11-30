@@ -53,7 +53,7 @@ bool GenericAnimation::isPlaying() {
 }
 
 void GenericAnimation::drawCircle(int radius, int center_x, int center_y,
-                               bool bold, short color, wchar_t symbol) {
+                                  bool bold, short color, wchar_t symbol) {
   for (int quad = 0; quad < 4; ++quad) {
     int x_mul = -1;
     if (quad % 2) {
@@ -76,7 +76,8 @@ void GenericAnimation::drawCircle(int radius, int center_x, int center_y,
           for (int k = 1; k <= (prev_h - h); ++k) {
             terminal.set(x - 1 - x_mul, y + (k * y_mul), symbol, false, color,
                          color);
-            terminal.set(x - x_mul, y + (k * y_mul), symbol, false, color, color);
+            terminal.set(x - x_mul, y + (k * y_mul), symbol, false, color,
+                         color);
           }
         }
         if (bold && ((prev_h - h) >= 1)) {
@@ -92,7 +93,7 @@ void GenericAnimation::drawCircle(int radius, int center_x, int center_y,
 // Algorithm taken from
 // http://www.roguebasin.com/index.php?title=Bresenham%27s_Line_Algorithm
 void GenericAnimation::drawLine(int x1, int y1, int x2, int y2, short color,
-                             std::function<wchar_t(int, int)> callback) {
+                                std::function<wchar_t(int, int)> callback) {
   int x_delta = x2 - x1;
   int y_delta = y2 - y1;
   int x_inc = (x_delta > 0) ? 1 : ((x_delta < 0) ? -1 : 0);
