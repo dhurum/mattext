@@ -36,6 +36,7 @@ class BeamAnimation : public GenericAnimation {
   int flash_max_radius;
   int flash_radius;
   short flash_color;
+  wchar_t flash_symbol;
   int beam_height;
   int beam_step;
   std::vector<std::pair<int, int>> text_edges;

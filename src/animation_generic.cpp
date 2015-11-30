@@ -53,7 +53,7 @@ bool GenericAnimation::isPlaying() {
 }
 
 void GenericAnimation::drawCircle(int radius, int center_x, int center_y,
-                               bool bold, short color) {
+                               bool bold, short color, wchar_t symbol) {
   for (int quad = 0; quad < 4; ++quad) {
     int x_mul = -1;
     if (quad % 2) {
@@ -69,19 +69,19 @@ void GenericAnimation::drawCircle(int radius, int center_x, int center_y,
       const int h = sqrt(radius * radius - i * i);
       const int y = center_y + (h * y_mul) + ((quad >= 2) ? 1 : 0);
 
-      terminal.set(x - 1 + x_mul, y, ' ', false, color, color);
-      terminal.set(x + x_mul, y, ' ', false, color, color);
+      terminal.set(x - 1 + x_mul, y, symbol, false, color, color);
+      terminal.set(x + x_mul, y, symbol, false, color, color);
       if (prev_h) {
         if ((prev_h - h) > 1) {
           for (int k = 1; k <= (prev_h - h); ++k) {
-            terminal.set(x - 1 - x_mul, y + (k * y_mul), ' ', false, color,
+            terminal.set(x - 1 - x_mul, y + (k * y_mul), symbol, false, color,
                          color);
-            terminal.set(x - x_mul, y + (k * y_mul), ' ', false, color, color);
+            terminal.set(x - x_mul, y + (k * y_mul), symbol, false, color, color);
           }
         }
         if (bold && ((prev_h - h) >= 1)) {
-          terminal.set(x - 1 - x_mul, y, ' ', false, color, color);
-          terminal.set(x - x_mul, y, ' ', false, color, color);
+          terminal.set(x - 1 - x_mul, y, symbol, false, color, color);
+          terminal.set(x - x_mul, y, symbol, false, color, color);
         }
       }
       prev_h = h;

@@ -33,6 +33,7 @@ void BeamAnimation::init() {
   flash_max_radius = terminal_height / 8;
   flash_radius = 1;
   flash_color = ColorWhite;
+  flash_symbol = L' ';
   beam_height = 0;
   beam_step = 0;
   text_edges.resize(terminal_height);
@@ -65,13 +66,13 @@ void BeamAnimation::init() {
       text_edges[y].first = x;
     }
 
-    return L' ';
+    return L'|';
   };
 
   terminal.setColors(ColorBlack, ColorBlack);
   for (int x = 0; x < terminal_width; ++x) {
     for (int y = 0; y < terminal_height; ++y) {
-      terminal.set(x, y, ' ', false, ColorBlack, ColorBlack);
+      terminal.set(x, y, '#', false, ColorBlack, ColorBlack);
     }
   }
 }
@@ -136,12 +137,15 @@ void BeamAnimation::tick(ev::timer &w, int revents) {
     }
   }
   if (showing_flash) {
-    drawCircle(flash_radius, center_x, center_y, true, flash_color);
-    drawCircle(flash_radius + 1, center_x, center_y, true, flash_color);
+    drawCircle(flash_radius, center_x, center_y, true, flash_color,
+               flash_symbol);
+    drawCircle(flash_radius + 1, center_x, center_y, true, flash_color,
+               flash_symbol);
 
     if (flash_color != ColorBlack) {
-      drawCircle(flash_radius + 1, center_x, center_y, false, ColorCyan);
-      drawCircle(flash_radius - 1, center_x, center_y, false, flash_color);
+      drawCircle(flash_radius + 1, center_x, center_y, false, ColorCyan, L'o');
+      drawCircle(flash_radius - 1, center_x, center_y, false, flash_color,
+                 flash_symbol);
     } else if (flash_radius > 0) {
       drawCircle(flash_radius - 1, center_x, center_y, false, ColorCyan);
     }
@@ -150,6 +154,7 @@ void BeamAnimation::tick(ev::timer &w, int revents) {
       flash_radius += 2;
     } else if (tick_id == ((flash_max_radius / 2) + 1)) {
       flash_color = ColorBlack;
+      flash_symbol = L'#';
       showing_beam = true;
     } else {
       flash_radius -= 2;
@@ -162,9 +167,9 @@ void BeamAnimation::tick(ev::timer &w, int revents) {
     beam_height += (terminal_height / flash_max_radius) + 1;
 
     drawLine(center_x, center_y - flash_radius - 1, center_x,
-             center_y - beam_height, ColorCyan);
+             center_y - beam_height, ColorCyan, [](int, int) { return L'|'; });
     drawLine(center_x - 1, center_y - flash_radius - 1, center_x - 1,
-             center_y - beam_height, ColorCyan);
+             center_y - beam_height, ColorCyan, [](int, int) { return L'|'; });
 
     if (beam_height >= terminal_height) {
       showing_beam = false;

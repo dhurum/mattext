@@ -45,7 +45,7 @@ class GenericAnimation : public Animation {
   virtual void tick(ev::timer &w, int revents) = 0;
 
   void drawCircle(int radius, int center_x, int center_y, bool bold,
-                  short color);
+                  short color, wchar_t symbol = L' ');
   void drawLine(int x1, int y1, int x2, int y2, short color,
                 std::function<wchar_t(int, int)> callback = nullptr);
 };
