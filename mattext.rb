@@ -2,10 +2,11 @@ require 'formula'
 
 class Mattext < Formula
   homepage 'https://github.com/dhurum/mattext'
-  url 'https://github.com/dhurum/mattext/archive/v0.7.tar.gz'
-  sha1 '9a2a60245a79a161473b50fc86b3e0c94e79092a967869707d459531ed12fc65'
+  url 'https://github.com/dhurum/mattext/archive/v0.8.tar.gz'
+  sha1 '4998efdf224f8f8c7afe54e3dffe60f547bcc573b50b6d3415d52865ee519ab2'
   depends_on 'cmake' => :build
   depends_on 'argp-standalone'
+  depends_on 'libev'
 
   def install
     system "cmake", "./", *std_cmake_args
