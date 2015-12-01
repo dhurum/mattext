@@ -23,6 +23,7 @@ Mattext is distributed in the hope that it will be useful,
 #include <exception>
 #include <memory>
 #include <locale.h>
+#include <stdlib.h>
 #include "config.h"
 #include "file_stream.h"
 #include "terminal.h"

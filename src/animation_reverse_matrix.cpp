@@ -19,6 +19,7 @@ Mattext is distributed in the hope that it will be useful,
 
 *******************************************************************************/
 
+#include <stdlib.h>
 #include "animation_reverse_matrix.h"
 #include "terminal.h"
 #include "config.h"
