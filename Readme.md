@@ -42,6 +42,12 @@ If you would like to install mattext, you can run `make install`
 * `echo "" | mattext -ni -b 0` - Show animation until quit command key is pressed, similar to cmatrix;
 * `mattext -niLv dir/*` - Show all files from directory dir, centrating text horizontally by longest line and vertically, until exit key is pressed. When mattext reaches the end of the last file it starts reading the first file. This mode can be useful for showing off your ascii art collection;
 
+You can redirect program output, in this case it would print text line by line, applying following transformations:  
+* Break long lines so they fit in the terminal;
+* Center text horizontally;
+* Center text horizontally by longest string;
+* Replace tabs with spaces;
+
 ###Troubleshooting:
 If you see white squares instead of some symbols, there can be 3 options:
 

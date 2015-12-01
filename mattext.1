@@ -101,6 +101,16 @@ Show animation until quit command key is pressed, similar to cmatrix.
 .TP
 .B mattext -niLv dir/*
 Show all files from directory dir, centrating text horizontally by longest line and vertically, until exit key is pressed. When mattext reaches the end of the last file it starts reading the first file. This mode can be useful for showing off your ascii art collection.
+.TP
+You can redirect program output, in this case it would print text line by line, applying following transformations:
+.TP
+-  Break long lines so they fit in the terminal;
+.TP
+- Center text horizontally;
+.TP
+- Center text horizontally by longest string;
+.TP
+- Replace tabs with spaces;
 
 .SH TROUBLESHOOTING
 .TP
