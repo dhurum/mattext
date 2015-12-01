@@ -44,4 +44,7 @@ class BeamAnimation : public GenericAnimation {
 
   void init() override;
   virtual void tick(ev::timer &w, int revents) override;
+  void showText();
+  void showFlash();
+  void showBeam();
 };

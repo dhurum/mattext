@@ -78,8 +78,8 @@ Terminal::Terminal(const Config &config)
     start_color();
     use_default_colors();
 
-    // Workaround for ncruses bug, bkgd does not work if called right after
-    // use_default_colors.
+    // Workaround for a bug in old ncurses versions, bkgd does not work if
+    // called right after use_default_colors.
     refresh();
 
     color_pairs[std::make_pair(default_fg, default_bg)] = 0;

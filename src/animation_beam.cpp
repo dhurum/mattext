@@ -77,104 +77,120 @@ void BeamAnimation::init() {
   }
 }
 
-void BeamAnimation::tick(ev::timer &w, int revents) {
+void BeamAnimation::showText() {
+  int beam_1_x = 0;
+  int beam_1_y = 0;
+  int beam_2_x = 0;
+  int beam_2_y = 0;
   const int center_x = terminal_width / 2;
   const int center_y = terminal_height - 1;
 
-  if (showing_text) {
-    int beam_1_x = 0;
-    int beam_1_y = 0;
-    int beam_2_x = 0;
-    int beam_2_y = 0;
+  switch (beam_step) {
+    case 0:
+      beam_1_x = terminal_width * 3 / 4;
+      beam_2_x = terminal_width / 4;
+      break;
+    case 1:
+      beam_1_x = terminal_width - 1;
+      break;
+    case 2:
+      beam_1_x = terminal_width - 1;
+      beam_1_y = terminal_height / 2;
+      beam_2_y = terminal_height / 2;
+      for (int y = 0; y < terminal_height / 2; ++y) {
+        for (int i = 0; i <= text_edges[y].first; ++i) {
+          terminal.set(i, y, text->get(i, y), false, ColorBlack, ColorWhite);
+        }
+        for (int i = text_edges[y].second; i <= terminal_width - 1; ++i) {
+          terminal.set(i, y, text->get(i, y), false, ColorBlack, ColorWhite);
+        }
+      }
+      break;
+    case 3:
+      beam_1_x = terminal_width - 1;
+      beam_1_y = center_y;
+      beam_2_y = center_y;
+      for (int y = terminal_height / 2; y < center_y; ++y) {
+        for (int i = 0; i <= text_edges[y].first; ++i) {
+          terminal.set(i, y, text->get(i, y), false, ColorBlack, ColorWhite);
+        }
+        for (int i = text_edges[y].second; i < terminal_width; ++i) {
+          terminal.set(i, y, text->get(i, y), false, ColorBlack, ColorWhite);
+        }
+      }
+      break;
+    default:
+      for (int i = 0; i < terminal_width; ++i) {
+        terminal.set(i, center_y, text->get(i, center_y), false, ColorBlack,
+                     ColorWhite);
+      }
+      showing_text = false;
+      break;
+  }
+  if (beam_step < 4) {
+    drawLine(center_x, center_y, beam_1_x, beam_1_y, ColorCyan, text_show_cb);
+    drawLine(center_x - 1, center_y, beam_2_x, beam_2_y, ColorCyan,
+             text_show_cb);
+    ++beam_step;
+  }
+}
 
-    switch (beam_step) {
-      case 0:
-        beam_1_x = terminal_width * 3 / 4;
-        beam_2_x = terminal_width / 4;
-        break;
-      case 1:
-        beam_1_x = terminal_width - 1;
-        break;
-      case 2:
-        beam_1_x = terminal_width - 1;
-        beam_1_y = terminal_height / 2;
-        beam_2_y = terminal_height / 2;
-        for (int y = 0; y < terminal_height / 2; ++y) {
-          for (int i = 0; i <= text_edges[y].first; ++i) {
-            terminal.set(i, y, text->get(i, y), false, ColorBlack, ColorWhite);
-          }
-          for (int i = text_edges[y].second; i <= terminal_width - 1; ++i) {
-            terminal.set(i, y, text->get(i, y), false, ColorBlack, ColorWhite);
-          }
-        }
-        break;
-      case 3:
-        beam_1_x = terminal_width - 1;
-        beam_1_y = center_y;
-        beam_2_y = center_y;
-        for (int y = terminal_height / 2; y < center_y; ++y) {
-          for (int i = 0; i <= text_edges[y].first; ++i) {
-            terminal.set(i, y, text->get(i, y), false, ColorBlack, ColorWhite);
-          }
-          for (int i = text_edges[y].second; i < terminal_width; ++i) {
-            terminal.set(i, y, text->get(i, y), false, ColorBlack, ColorWhite);
-          }
-        }
-        break;
-      default:
-        for (int i = 0; i < terminal_width; ++i) {
-          terminal.set(i, center_y, text->get(i, center_y), false, ColorBlack,
-                       ColorWhite);
-        }
-        showing_text = false;
-        break;
-    }
-    if (beam_step < 4) {
-      drawLine(center_x, center_y, beam_1_x, beam_1_y, ColorCyan, text_show_cb);
-      drawLine(center_x - 1, center_y, beam_2_x, beam_2_y, ColorCyan,
-               text_show_cb);
-      ++beam_step;
-    }
+void BeamAnimation::showFlash() {
+  const int center_x = terminal_width / 2;
+  const int center_y = terminal_height - 1;
+
+  drawCircle(flash_radius, center_x, center_y, true, flash_color, flash_symbol);
+  drawCircle(flash_radius + 1, center_x, center_y, true, flash_color,
+             flash_symbol);
+
+  if (flash_color != ColorBlack) {
+    drawCircle(flash_radius + 1, center_x, center_y, false, ColorCyan, L'o');
+    drawCircle(flash_radius - 1, center_x, center_y, false, flash_color,
+               flash_symbol);
+  } else if (flash_radius > 0) {
+    drawCircle(flash_radius - 1, center_x, center_y, false, ColorCyan);
+  }
+
+  if ((tick_id <= (flash_max_radius / 2))) {
+    flash_radius += 2;
+  } else if (tick_id == ((flash_max_radius / 2) + 1)) {
+    flash_color = ColorBlack;
+    flash_symbol = L'#';
+    showing_beam = true;
+  } else {
+    flash_radius -= 2;
+  }
+  if (flash_radius <= 0) {
+    showing_flash = false;
+  }
+}
+
+void BeamAnimation::showBeam() {
+  const int center_x = terminal_width / 2;
+  const int center_y = terminal_height - 1;
+
+  beam_height += (terminal_height / flash_max_radius) + 1;
+
+  drawLine(center_x, center_y - flash_radius - 1, center_x,
+           center_y - beam_height, ColorCyan, [](int, int) { return L'|'; });
+  drawLine(center_x - 1, center_y - flash_radius - 1, center_x - 1,
+           center_y - beam_height, ColorCyan, [](int, int) { return L'|'; });
+
+  if (beam_height >= terminal_height) {
+    showing_beam = false;
+    showing_text = true;
+  }
+}
+
+void BeamAnimation::tick(ev::timer &w, int revents) {
+  if (showing_text) {
+    showText();
   }
   if (showing_flash) {
-    drawCircle(flash_radius, center_x, center_y, true, flash_color,
-               flash_symbol);
-    drawCircle(flash_radius + 1, center_x, center_y, true, flash_color,
-               flash_symbol);
-
-    if (flash_color != ColorBlack) {
-      drawCircle(flash_radius + 1, center_x, center_y, false, ColorCyan, L'o');
-      drawCircle(flash_radius - 1, center_x, center_y, false, flash_color,
-                 flash_symbol);
-    } else if (flash_radius > 0) {
-      drawCircle(flash_radius - 1, center_x, center_y, false, ColorCyan);
-    }
-
-    if ((tick_id <= (flash_max_radius / 2))) {
-      flash_radius += 2;
-    } else if (tick_id == ((flash_max_radius / 2) + 1)) {
-      flash_color = ColorBlack;
-      flash_symbol = L'#';
-      showing_beam = true;
-    } else {
-      flash_radius -= 2;
-    }
-    if (flash_radius <= 0) {
-      showing_flash = false;
-    }
+    showFlash();
   }
   if (showing_beam && (tick_id > ((flash_max_radius / 2) + 1))) {
-    beam_height += (terminal_height / flash_max_radius) + 1;
-
-    drawLine(center_x, center_y - flash_radius - 1, center_x,
-             center_y - beam_height, ColorCyan, [](int, int) { return L'|'; });
-    drawLine(center_x - 1, center_y - flash_radius - 1, center_x - 1,
-             center_y - beam_height, ColorCyan, [](int, int) { return L'|'; });
-
-    if (beam_height >= terminal_height) {
-      showing_beam = false;
-      showing_text = true;
-    }
+    showBeam();
   }
 
   ++tick_id;
