@@ -74,7 +74,7 @@ Animation *AnimationStore::get(std::string name) const {
 std::string AnimationStore::getNames() {
   std::string names;
 
-  for (auto &info : animation_info) {
+  for (const auto &info : animation_info) {
     if (names.size()) {
       names += ", ";
     }

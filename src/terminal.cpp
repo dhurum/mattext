@@ -220,7 +220,7 @@ void Terminal::stop() const {
 
 void Terminal::inputCb(ev::io &w, int revents) {
   int key = getch();
-  for (auto cb : on_key_press) {
+  for (const auto &cb : on_key_press) {
     cb(key);
   }
 }

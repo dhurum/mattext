@@ -27,7 +27,7 @@ class FileIO;
 
 class FileReaderLogic {
  public:
-  virtual ~FileReaderLogic(){};
+  virtual ~FileReaderLogic() = default;
   virtual void newPage() = 0;
   virtual void directionChanged() = 0;
   virtual bool read(FileIO &f) = 0;

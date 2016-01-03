@@ -23,5 +23,5 @@ Mattext is distributed in the hope that it will be useful,
 
 class Manager {
  public:
-  virtual ~Manager(){};
+  virtual ~Manager() = default;
 };

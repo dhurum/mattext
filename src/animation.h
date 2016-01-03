@@ -34,7 +34,7 @@ class Terminal;
 
 class Animation {
  public:
-  virtual ~Animation(){};
+  virtual ~Animation() = default;
   virtual void play(const Text &text, std::function<void()> on_stop) = 0;
   virtual void stop() = 0;
   virtual bool isPlaying() = 0;

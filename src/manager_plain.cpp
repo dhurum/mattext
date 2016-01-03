@@ -32,7 +32,7 @@ ManagerPlain::ManagerPlain(FileStream &file_stream) : file_stream(file_stream) {
   read();
 }
 
-ManagerPlain::~ManagerPlain() {}
+ManagerPlain::~ManagerPlain() = default;
 
 void ManagerPlain::read() {
   file_stream.read(
