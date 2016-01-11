@@ -75,10 +75,9 @@ set(CMAKE_CXX_FLAGS
   ${CMAKE_CXX_FLAGS}
   -Werror
   -Wall
-  -Wuninitialized
-  -Winit-self
-  -Wtype-limits
-  -Wempty-body
+  -Wextra
+  -Wno-unused-parameter
+  -Wpedantic
   --std=c++1y
 )
 #add additional warning option for gcc

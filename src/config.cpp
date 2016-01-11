@@ -141,8 +141,8 @@ Config::Config(int argc, char *argv[]) {
        6},
       {"tab-width", 't', "width", 0,
        "Tab width, minimum 1, default " MAKE_STR(DEFAULT_TAB_WIDTH), 7},
-      {0}};
+      {0, 0, 0, 0, 0, 0}};
 
-  argp argp_opts = {options, parseOptions, "file[, file, ...]"};
+  argp argp_opts = {options, parseOptions, "file[, file, ...]", 0, 0, 0, 0};
   argp_parse(&argp_opts, argc, argv, 0, 0, this);
 }
