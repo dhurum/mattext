@@ -80,10 +80,6 @@ set(CMAKE_CXX_FLAGS
   -Wpedantic
   --std=c++1y
 )
-#add additional warning option for gcc
-if(CMAKE_COMPILER_IS_GNUCXX)
-  set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -Wclobbered)
-endif()
 
 if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
   set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -O2)
