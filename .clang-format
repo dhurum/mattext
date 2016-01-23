@@ -4,3 +4,4 @@ NamespaceIndentation: All
 AllowShortFunctionsOnASingleLine: Empty
 Standard: Cpp11
 BreakBeforeBinaryOperators: NonAssignment
+AlwaysBreakTemplateDeclarations: false
