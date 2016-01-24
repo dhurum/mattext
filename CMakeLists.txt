@@ -85,14 +85,10 @@ if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
   set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -O2)
 endif()
 
-set (CMAKE_CXX_FLAGS_DEBUG 
-  ${CMAKE_CXX_FLAGS_DEBUG}
-  -g3
-)
+set (CMAKE_CXX_FLAGS_DEBUG -g3)
 
 #transform list to string
 string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-string(REPLACE ";" " " CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
 
 set(${TARGET}_SRCS
   src/config.cpp
