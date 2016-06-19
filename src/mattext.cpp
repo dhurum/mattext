@@ -20,15 +20,15 @@ Mattext is distributed in the hope that it will be useful,
 *******************************************************************************/
 
 #include <ev++.h>
-#include <exception>
-#include <memory>
 #include <locale.h>
 #include <stdlib.h>
+#include <exception>
+#include <memory>
 #include "config.h"
 #include "file_stream.h"
-#include "terminal.h"
 #include "manager_interactive.h"
 #include "manager_plain.h"
+#include "terminal.h"
 
 int main(int argc, char *argv[]) {
   srand(time(NULL));

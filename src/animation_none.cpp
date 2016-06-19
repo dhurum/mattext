@@ -20,8 +20,8 @@ Mattext is distributed in the hope that it will be useful,
 *******************************************************************************/
 
 #include "animation_none.h"
-#include "terminal.h"
 #include "file_reader.h"
+#include "terminal.h"
 
 NoneAnimation::NoneAnimation(const Terminal &terminal) : terminal(terminal) {}
 

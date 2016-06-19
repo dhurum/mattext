@@ -19,11 +19,11 @@ Mattext is distributed in the hope that it will be useful,
 
 *******************************************************************************/
 
+#include "animation_generic.h"
 #include <math.h>
 #include <stdlib.h>
-#include "animation_generic.h"
-#include "terminal.h"
 #include "config.h"
+#include "terminal.h"
 
 GenericAnimation::GenericAnimation(const Config &config,
                                    const Terminal &terminal)

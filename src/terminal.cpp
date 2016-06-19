@@ -20,16 +20,16 @@ Mattext is distributed in the hope that it will be useful,
 *******************************************************************************/
 
 #define _XOPEN_SOURCE_EXTENDED
+#include "terminal.h"
+#include <assert.h>
 #include <curses.h>
-#include <vector>
+#include <fcntl.h>
+#include <string.h>
+#include <sys/ioctl.h>
 #include <unistd.h>
 #include <sstream>
 #include <stdexcept>
-#include <assert.h>
-#include <sys/ioctl.h>
-#include <string.h>
-#include <fcntl.h>
-#include "terminal.h"
+#include <vector>
 #include "config.h"
 
 Terminal::Terminal(const Config &config)

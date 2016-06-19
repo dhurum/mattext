@@ -19,8 +19,8 @@ Mattext is distributed in the hope that it will be useful,
 
 *******************************************************************************/
 
-#include <stdlib.h>
 #include "file_cache.h"
+#include <stdlib.h>
 
 void FileCache::addForward(char byte) {
   cur = (start + len) % cache_max_len;

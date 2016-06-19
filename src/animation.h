@@ -23,10 +23,10 @@ Mattext is distributed in the hope that it will be useful,
 
 #include <ev++.h>
 #include <functional>
-#include <unordered_map>
+#include <list>
 #include <memory>
 #include <string>
-#include <list>
+#include <unordered_map>
 
 class Text;
 class Config;

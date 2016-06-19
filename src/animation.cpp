@@ -19,14 +19,14 @@ Mattext is distributed in the hope that it will be useful,
 
 *******************************************************************************/
 
-#include <stdexcept>
-#include <sstream>
 #include "animation.h"
-#include "animation_matrix.h"
-#include "animation_reverse_matrix.h"
-#include "animation_none.h"
-#include "animation_fire.h"
+#include <sstream>
+#include <stdexcept>
 #include "animation_beam.h"
+#include "animation_fire.h"
+#include "animation_matrix.h"
+#include "animation_none.h"
+#include "animation_reverse_matrix.h"
 
 struct AnimationInfo {
   std::string name;

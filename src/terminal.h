@@ -21,11 +21,11 @@ Mattext is distributed in the hope that it will be useful,
 
 #pragma once
 
-#include <vector>
-#include <map>
-#include <functional>
-#include <unistd.h>
 #include <ev++.h>
+#include <unistd.h>
+#include <functional>
+#include <map>
+#include <vector>
 
 class Config;
 

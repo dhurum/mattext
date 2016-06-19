@@ -19,17 +19,17 @@ Mattext is distributed in the hope that it will be useful,
 
 *******************************************************************************/
 
-#include <sstream>
-#include <stdexcept>
-#include <string.h>
+#include "manager_interactive.h"
 #include <ev++.h>
 #include <ncurses.h>
-#include "manager_interactive.h"
+#include <string.h>
+#include <sstream>
+#include <stdexcept>
+#include "animation.h"
 #include "config.h"
+#include "direction.h"
 #include "file_stream.h"
 #include "terminal.h"
-#include "direction.h"
-#include "animation.h"
 
 ManagerInteractive::ManagerInteractive(const Config &config,
                                        FileStream &file_stream,
@@ -94,9 +94,11 @@ void ManagerInteractive::getNextPage() {
     return;
   }
   current_animation = animation_next;
-  file_stream.read([this](const Text &text) {
-    this->current_animation->play(text, [this]() { this->checkPending(); });
-  }, nullptr);
+  file_stream.read(
+      [this](const Text &text) {
+        this->current_animation->play(text, [this]() { this->checkPending(); });
+      },
+      nullptr);
 }
 
 void ManagerInteractive::getPrevPage() {
@@ -105,9 +107,11 @@ void ManagerInteractive::getPrevPage() {
     return;
   }
   current_animation = animation_prev;
-  file_stream.read([this](const Text &text) {
-    this->current_animation->play(text, [this]() { this->checkPending(); });
-  }, nullptr, Direction::Backward);
+  file_stream.read(
+      [this](const Text &text) {
+        this->current_animation->play(text, [this]() { this->checkPending(); });
+      },
+      nullptr, Direction::Backward);
 }
 
 void ManagerInteractive::quit() {

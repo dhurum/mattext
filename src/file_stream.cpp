@@ -19,15 +19,15 @@ Mattext is distributed in the hope that it will be useful,
 
 *******************************************************************************/
 
+#include "file_stream.h"
 #include <fcntl.h>
-#include <stdexcept>
 #include <unistd.h>
 #include <sstream>
-#include "file_stream.h"
+#include <stdexcept>
 #include "config.h"
-#include "terminal.h"
-#include "file_reader.h"
 #include "file_io.h"
+#include "file_reader.h"
+#include "terminal.h"
 
 FileStream::FileStream(const Config &config, const Terminal &terminal)
     : config(config),

@@ -19,10 +19,10 @@ Mattext is distributed in the hope that it will be useful,
 
 *******************************************************************************/
 
+#include "file_backward_reader.h"
+#include <string.h>
 #include <wchar.h>
 #include <stdexcept>
-#include <string.h>
-#include "file_backward_reader.h"
 #include "config.h"
 #include "file_io.h"
 

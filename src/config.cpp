@@ -19,10 +19,10 @@ Mattext is distributed in the hope that it will be useful,
 
 *******************************************************************************/
 
-#include <string>
+#include "config.h"
 #include <argp.h>
 #include <stdlib.h>
-#include "config.h"
+#include <string>
 #include "animation.h"
 
 #define _MAKE_STR(a) #a

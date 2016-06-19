@@ -19,14 +19,14 @@ Mattext is distributed in the hope that it will be useful,
 
 *******************************************************************************/
 
-#include <wchar.h>
-#include <stdexcept>
-#include <sstream>
+#include "manager_plain.h"
 #include <ev++.h>
 #include <string.h>
-#include "manager_plain.h"
-#include "file_stream.h"
+#include <wchar.h>
+#include <sstream>
+#include <stdexcept>
 #include "file_reader.h"
+#include "file_stream.h"
 
 ManagerPlain::ManagerPlain(FileStream &file_stream) : file_stream(file_stream) {
   read();

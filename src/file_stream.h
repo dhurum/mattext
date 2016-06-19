@@ -21,10 +21,10 @@ Mattext is distributed in the hope that it will be useful,
 
 #pragma once
 
-#include <list>
-#include <functional>
-#include <memory>
 #include <ev++.h>
+#include <functional>
+#include <list>
+#include <memory>
 #include "direction.h"
 
 class Terminal;

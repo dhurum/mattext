@@ -21,8 +21,8 @@ Mattext is distributed in the hope that it will be useful,
 
 #pragma once
 
-#include <vector>
 #include <stddef.h>
+#include <vector>
 
 class FileCache {
  public:

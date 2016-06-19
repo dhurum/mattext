@@ -19,11 +19,11 @@ Mattext is distributed in the hope that it will be useful,
 
 *******************************************************************************/
 
-#include <math.h>
 #include "animation_beam.h"
-#include "terminal.h"
+#include <math.h>
 #include "config.h"
 #include "file_reader.h"
+#include "terminal.h"
 
 void BeamAnimation::init() {
   tick_id = 0;

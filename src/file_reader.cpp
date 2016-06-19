@@ -20,12 +20,12 @@ Mattext is distributed in the hope that it will be useful,
 *******************************************************************************/
 
 #include "file_reader.h"
-#include "file_forward_reader.h"
-#include "file_backward_reader.h"
-#include "file_reader_logic.h"
 #include "config.h"
-#include "terminal.h"
+#include "file_backward_reader.h"
+#include "file_forward_reader.h"
 #include "file_io.h"
+#include "file_reader_logic.h"
+#include "terminal.h"
 
 FileReader::FileReader(const Config &config, const Terminal &terminal)
     : terminal(terminal),

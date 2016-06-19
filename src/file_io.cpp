@@ -19,13 +19,13 @@ Mattext is distributed in the hope that it will be useful,
 
 *******************************************************************************/
 
+#include "file_io.h"
 #include <fcntl.h>
-#include <stdexcept>
 #include <string.h>
-#include <sstream>
 #include <sys/stat.h>
 #include <unistd.h>
-#include "file_io.h"
+#include <sstream>
+#include <stdexcept>
 #include "file_cache.h"
 
 FileIO::FileIO(const char *name) : name(name) {

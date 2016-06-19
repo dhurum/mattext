@@ -21,8 +21,8 @@ Mattext is distributed in the hope that it will be useful,
 
 #pragma once
 
-#include <vector>
 #include <unordered_set>
+#include <vector>
 #include "animation_generic.h"
 
 class FireAnimation : public GenericAnimation {
