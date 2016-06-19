@@ -45,7 +45,7 @@ void MatrixAnimation::init() {
   terminal.setColors(ColorGreen, ColorBlack);
 }
 
-void MatrixAnimation::tick(ev::timer &w, int revents) {
+void MatrixAnimation::tick(ev::timer & /*w*/, int /*revents*/) {
   int _terminal_height = static_cast<int>(terminal_height);
   bool stopped = true;
 

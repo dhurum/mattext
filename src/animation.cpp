@@ -44,7 +44,7 @@ static std::list<AnimationInfo> animation_info{
        return std::make_unique<ReverseMatrixAnimation>(config, terminal);
      }},
     {"none",
-     [](const Config &config, const Terminal &terminal) {
+     [](const Config &, const Terminal &terminal) {
        return std::make_unique<NoneAnimation>(terminal);
      }},
     {"fire",

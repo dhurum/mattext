@@ -67,7 +67,7 @@ void FireAnimation::init() {
   tick_id = 0;
 }
 
-void FireAnimation::tick(ev::timer &w, int revents) {
+void FireAnimation::tick(ev::timer & /*w*/, int /*revents*/) {
   const int _terminal_height = static_cast<int>(terminal_height);
   bool stopped = true;
   size_t prev = fire_heights[0];

@@ -182,7 +182,7 @@ void BeamAnimation::showBeam() {
   }
 }
 
-void BeamAnimation::tick(ev::timer &w, int revents) {
+void BeamAnimation::tick(ev::timer & /*w*/, int /*revents*/) {
   if (showing_text) {
     showText();
   }

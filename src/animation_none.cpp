@@ -25,7 +25,7 @@ Mattext is distributed in the hope that it will be useful,
 
 NoneAnimation::NoneAnimation(const Terminal &terminal) : terminal(terminal) {}
 
-void NoneAnimation::play(const Text &text, std::function<void()> on_stop) {
+void NoneAnimation::play(const Text &text, std::function<void()> /*on_stop*/) {
   for (size_t row = 0; row < terminal.getHeight(); ++row) {
     for (size_t col = 0; col < terminal.getWidth(); ++col) {
       terminal.set(col, row, text.get(col, row));

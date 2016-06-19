@@ -25,7 +25,7 @@ Mattext is distributed in the hope that it will be useful,
 #include "config.h"
 #include "file_reader.h"
 
-void ReverseMatrixAnimation::tick(ev::timer &w, int revents) {
+void ReverseMatrixAnimation::tick(ev::timer & /*w*/, int /*revents*/) {
   int _terminal_height = static_cast<int>(terminal_height);
   bool stopped = true;
 

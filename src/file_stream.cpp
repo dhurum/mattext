@@ -86,7 +86,7 @@ bool FileStream::nextFile() {
   return true;
 }
 
-void FileStream::readCb(ev::io &w, int revents) {
+void FileStream::readCb(ev::io & /*w*/, int /*revents*/) {
   if (!file_reader->read(**current_file)) {
     if (file_reader->linesRead() >= block_lines) {
       io_watcher.stop();

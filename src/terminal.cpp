@@ -218,7 +218,7 @@ void Terminal::stop() const {
   io_watcher.stop();
 }
 
-void Terminal::inputCb(ev::io &w, int revents) {
+void Terminal::inputCb(ev::io & /*w*/, int /*revents*/) {
   int key = getch();
   for (const auto &cb : on_key_press) {
     cb(key);

@@ -76,7 +76,6 @@ set(CMAKE_CXX_FLAGS
   -Werror
   -Wall
   -Wextra
-  -Wno-unused-parameter
   -Wpedantic
   --std=c++1y
 )
