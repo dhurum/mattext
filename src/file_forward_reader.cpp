@@ -94,7 +94,8 @@ bool ForwardReader::readLine(FileIO &f) {
     }
     if (ret == FileIO::Status::WouldBlock) {
       return false;
-    } else if (ret == FileIO::Status::End) {
+    }
+    if (ret == FileIO::Status::End) {
       return true;
     }
     ++cur_symbol_id;

@@ -62,7 +62,7 @@ void MatrixAnimation::tick(ev::timer& /*w*/, int /*revents*/) {
 
     // Make previous bottom symbol not bold
     if ((col_start >= 1) && (col_start <= _terminal_height)) {
-      bool bold = ((rand() % 100) > 90) ? true : false;
+      bool bold = (rand() % 100) > 90;
       terminal.set(col, col_start - 1, terminal.get(col, col_start - 1), bold,
                    ColorGreen, ColorBlack);
     }
@@ -76,7 +76,7 @@ void MatrixAnimation::tick(ev::timer& /*w*/, int /*revents*/) {
     // Change random symbol in column
     int row_id = rand() % _terminal_height;
     if ((row_id >= col_end) && (row_id < col_start)) {
-      bool bold = ((rand() % 100) > 60) ? true : false;
+      bool bold = (rand() % 100) > 60;
       terminal.set(col, row_id, getRandSymbol(), bold, ColorGreen, ColorBlack);
     }
 
@@ -106,9 +106,11 @@ wchar_t MatrixAnimation::getRandSymbol() {
 
   if (type < 100) {
     return 0x30 + rand() % 9;
-  } else if (type < 300) {
+  }
+  if (type < 300) {
     return 0x41 + rand() % 26;
-  } else if (type < 600) {
+  }
+  if (type < 600) {
     return 0x61 + rand() % 26;
   }
   return 0xff66 + rand() % 58;

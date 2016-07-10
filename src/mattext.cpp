@@ -31,7 +31,7 @@ Mattext is distributed in the hope that it will be useful,
 #include "terminal.h"
 
 int main(int argc, char *argv[]) {
-  srand(time(NULL));
+  srand(time(nullptr));
   setlocale(LC_CTYPE, "");
 
   try {

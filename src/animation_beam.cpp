@@ -39,7 +39,7 @@ void BeamAnimation::init() {
   text_edges.resize(terminal_height);
 
   for (auto &edge : text_edges) {
-    edge = std::make_pair<int, int>(-1, -1);
+    edge = std::make_pair(-1, -1);
   }
 
   text_show_cb = [this](int x, int y) {

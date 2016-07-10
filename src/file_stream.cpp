@@ -114,7 +114,8 @@ void FileStream::read(std::function<void(const Text &text)> _on_read,
   if (end_reached) {
     if (_direction == direction) {
       return;
-    } else if (_direction == Direction::Backward) {
+    }
+    if (_direction == Direction::Backward) {
       --current_file;
     }
   }

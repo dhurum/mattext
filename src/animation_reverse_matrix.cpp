@@ -42,7 +42,7 @@ void ReverseMatrixAnimation::tick(ev::timer& /*w*/, int /*revents*/) {
 
     // Make previous bottom symbol not bold
     if ((col_start >= 0) && (col_start <= _terminal_height - 2)) {
-      bool bold = ((rand() % 100) > 90) ? true : false;
+      bool bold = (rand() % 100) > 90;
       terminal.set(col, col_start + 1, terminal.get(col, col_start + 1), bold,
                    ColorGreen, ColorBlack);
     }
@@ -56,7 +56,7 @@ void ReverseMatrixAnimation::tick(ev::timer& /*w*/, int /*revents*/) {
     // Change random symbol in column
     int row_id = rand() % _terminal_height;
     if ((row_id >= col_end) && (row_id < col_start)) {
-      bool bold = ((rand() % 100) > 60) ? true : false;
+      bool bold = (rand() % 100) > 60;
       terminal.set(col, row_id, getRandSymbol(), bold, ColorGreen, ColorBlack);
     }
 

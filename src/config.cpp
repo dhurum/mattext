@@ -29,7 +29,7 @@ Mattext is distributed in the hope that it will be useful,
 #define MAKE_STR(a) _MAKE_STR(a)
 
 static bool getIntArg(int &value, char *str) {
-  char *end = NULL;
+  char *end = nullptr;
   int res = strtol(str, &end, 0);
 
   if (str == end) {
@@ -40,7 +40,7 @@ static bool getIntArg(int &value, char *str) {
 }
 
 static error_t parseOptions(int key, char *arg, struct argp_state *state) {
-  Config *config = (Config *)state->input;
+  Config *config = reinterpret_cast<Config *>(state->input);
 
   switch (key) {
     case 'd':
@@ -120,29 +120,31 @@ Config::Config(int argc, char *argv[]) {
            DEFAULT_DELAY),
        1},
       {"rand-len", 'l', "value", 0, "Max length of random symbols columns", 1},
-      {"non-interact", 'n', NULL, 0, "Run in non-interactive mode", 2},
-      {"infinite", 'i', NULL, 0,
+      {"non-interact", 'n', nullptr, 0, "Run in non-interactive mode", 2},
+      {"infinite", 'i', nullptr, 0,
        "At the end of file start reading it from the beginning", 2},
       {"block-lines", 'b', "value", 0,
        "Block until at least specified number of lines is read, "
        "default " MAKE_STR(DEFAULT_BLOCK_LINES),
        2},
-      {"block-page", 'B', NULL, 0, "Block until full page is read", 2},
-      {"colorize", 'c', NULL, OPTION_HIDDEN, "Colorize output", 3},
-      {"no-color", 'N', NULL, 0, "Do not colorize output", 3},
-      {"center-horiz", 'C', NULL, 0, "Center text horizontally", 4},
-      {"center-horiz-longest", 'L', NULL, 0,
+      {"block-page", 'B', nullptr, 0, "Block until full page is read", 2},
+      {"colorize", 'c', nullptr, OPTION_HIDDEN, "Colorize output", 3},
+      {"no-color", 'N', nullptr, 0, "Do not colorize output", 3},
+      {"center-horiz", 'C', nullptr, 0, "Center text horizontally", 4},
+      {"center-horiz-longest", 'L', nullptr, 0,
        "Center text horizontally by longest string", 4},
-      {"center-vert", 'v', NULL, 0, "Center text vertically", 4},
-      {"without-japanese", 'e', NULL, 0, "Do not use Japanese symbols", 5},
+      {"center-vert", 'v', nullptr, 0, "Center text vertically", 4},
+      {"without-japanese", 'e', nullptr, 0, "Do not use Japanese symbols", 5},
       {"animation", 'a', "name", 0, animation_desc.c_str(), 6},
       {"animation-next", -1, "name", 0, "Animation for showing next page", 6},
       {"animation-prev", -2, "name", 0, "Animation for showing previous page",
        6},
       {"tab-width", 't', "width", 0,
        "Tab width, minimum 1, default " MAKE_STR(DEFAULT_TAB_WIDTH), 7},
-      {0, 0, 0, 0, 0, 0}};
+      {nullptr, 0, nullptr, 0, nullptr, 0}};
 
-  argp argp_opts = {options, parseOptions, "file[, file, ...]", 0, 0, 0, 0};
-  argp_parse(&argp_opts, argc, argv, 0, 0, this);
+  argp argp_opts = {options, parseOptions, "file[, file, ...]",
+                    nullptr, nullptr,      nullptr,
+                    nullptr};
+  argp_parse(&argp_opts, argc, argv, 0, nullptr, this);
 }

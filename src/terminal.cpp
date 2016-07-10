@@ -229,7 +229,7 @@ void Terminal::onKeyPress(std::function<void(int)> _on_key_press) const {
   if (!_on_key_press) {
     return;
   }
-  if (!on_key_press.size()) {
+  if (on_key_press.empty()) {
     io_watcher.set<Terminal, &Terminal::inputCb>(const_cast<Terminal *>(this));
     io_watcher.start(tty_fd, ev::READ);
   }

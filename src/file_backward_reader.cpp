@@ -139,7 +139,8 @@ bool BackwardReader::fillCache(FileIO &f) {
     }
     if (ret == FileIO::Status::WouldBlock) {
       return false;
-    } else if (ret == FileIO::Status::End) {
+    }
+    if (ret == FileIO::Status::End) {
       first_page = true;
       return true;
     }
@@ -149,9 +150,8 @@ bool BackwardReader::fillCache(FileIO &f) {
         f.unread();
         line_started = false;
         return true;
-      } else {
-        line_has_nl = true;
       }
+      line_has_nl = true;
     }
     ++cache_len;
     line_started = true;
