@@ -1,9 +1,9 @@
-##Simple matrix-style pager
+## Simple matrix-style pager
 
 Mattext shows text with different animations (including matrix-style rain-of-symbols) during page changes ([video](https://youtu.be/EuGp7daniX0)).  
 Usage: `mattext [options] file1 [file2 ...]` or `cat file | mattext [options]`.
 
-###Options:
+### Options:
 * `-d`, `--delay <delay>` - Delay between screen redraws, in milliseconds, default 60;
 * `-l`, `--rand-len <length>` - Maximum length of random symbols columns;
 * `-n`, `--non-interact` - Do not wait for user input before showing next page;
@@ -20,12 +20,12 @@ Usage: `mattext [options] file1 [file2 ...]` or `cat file | mattext [options]`.
 * `--animation-prev <name>` - Animation for showing previous page;
 * `-t`, `--tab-width <width>` - Tab width, minimum 1, default 4;
 
-###Commands:
+### Commands:
 * <kbd>q</kbd>, <kbd>ctrl + D</kbd> - Exit program;
 * <kbd>f</kbd>, <kbd>j</kbd>, <kbd>space</kbd>, <kbd>PgDown</kbd>, <kbd>Down</kbd> - Show next page;
 * <kbd>b</kbd>, <kbd>k</kbd>, <kbd>PgUp</kbd>, <kbd>Up</kbd> - Show previous page;
 
-###Building:
+### Building:
 You will need a c++ compiler with c++14 (c++1y) support, ncurses built with widechar support and libev.
 
 If you use Archlinux, you can take stable [package](https://aur.archlinux.org/packages/mattext/) from aur, or PKGBUILD from [archlinux](https://github.com/dhurum/mattext/tree/archlinux) branch.  
@@ -35,7 +35,7 @@ To build mattext from sources open terminal, go to mattext dir, and run `mkdir b
 This will build mattext binary. To test it, you can run `./mattext ../src/mattext.cpp`  
 If you would like to install mattext, you can run `make install`
 
-###Examples:
+### Examples:
 * `mattext file` - Show file one page at a time, and exit at the end;
 * `mattext -ni file` - Show file until exit key is pressed. When end is reached mattext starts reading it from the beginning;
 * `tail -f file | mattext -n` - Show file, waiting for at least one new line added to it before redrawing screen;
@@ -48,7 +48,7 @@ You can redirect program output, in this case it would print text line by line, 
 * Center text horizontally by longest string;
 * Replace tabs with spaces;
 
-###Troubleshooting:
+### Troubleshooting:
 If you see white squares instead of some symbols, there can be 3 options:
 
 1. Your terminal does not support unicode - you can use another terminal or `--without-japanese` option;
